@@ -1,0 +1,23 @@
+.footer {
+  padding: 5% 5% 10px 5%;
+  display: flex;
+  justify-content: center;
+  gap: 5%;
+}
+
+.footer img {
+  width: 24px;
+  height: 24px;
+}
+
+@media screen and (max-width: 500px) {
+  .footer img {
+    width: 30px;
+    height: 30px;
+  }
+
+  .footer {
+    padding: 10% 10% 10px 10%;
+    gap: 15%
+  }
+}
