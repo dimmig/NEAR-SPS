@@ -1,24 +1,24 @@
 {
   "files": {
-    "main.css": "/sps/static/css/main.df0ebd83.css",
-    "main.js": "/sps/static/js/main.8f3b387e.js",
-    "static/js/787.c4e7f8f9.chunk.js": "/sps/static/js/787.c4e7f8f9.chunk.js",
-    "static/media/display.png": "/sps/static/media/display.ef73b860c1459d0cf518.png",
-    "static/media/team-icon.svg": "/sps/static/media/team-icon.2168737cd6c5db70e56acd987189ae1f.svg",
-    "static/media/algorithm-icon.svg": "/sps/static/media/algorithm-icon.60a0d757ac3e5ae81126602006a76be1.svg",
-    "static/media/github-icon.svg": "/sps/static/media/github-icon.8216e87d2c4c611ba696bcfaeaccff75.svg",
-    "static/media/twitter-icon.svg": "/sps/static/media/twitter-icon.fc28943b36018f1b48e83a06c25d7f2f.svg",
-    "static/media/telegram-icon.svg": "/sps/static/media/telegram-icon.84cf6037778a49fff997024847443051.svg",
-    "index.html": "/sps/index.html",
-    "static/media/arrow-down-icon.svg": "/sps/static/media/arrow-down-icon.fb6db85400632b1b2d0e8dcb163a0dc6.svg",
-    "static/media/arrow-left-icon.svg": "/sps/static/media/arrow-left-icon.743757af1ba20e9a529f0b0489abbc52.svg",
-    "static/media/arrow-right-icon.svg": "/sps/static/media/arrow-right-icon.2fce0b6d079aa072124e0b00bcbd0402.svg",
-    "main.df0ebd83.css.map": "/sps/static/css/main.df0ebd83.css.map",
-    "main.8f3b387e.js.map": "/sps/static/js/main.8f3b387e.js.map",
-    "787.c4e7f8f9.chunk.js.map": "/sps/static/js/787.c4e7f8f9.chunk.js.map"
+    "main.css": "/NEAR-SPS/static/css/main.df0ebd83.css",
+    "main.js": "/NEAR-SPS/static/js/main.baabd323.js",
+    "static/js/787.c4e7f8f9.chunk.js": "/NEAR-SPS/static/js/787.c4e7f8f9.chunk.js",
+    "static/media/display.png": "/NEAR-SPS/static/media/display.ef73b860c1459d0cf518.png",
+    "static/media/team-icon.svg": "/NEAR-SPS/static/media/team-icon.2168737cd6c5db70e56acd987189ae1f.svg",
+    "static/media/algorithm-icon.svg": "/NEAR-SPS/static/media/algorithm-icon.60a0d757ac3e5ae81126602006a76be1.svg",
+    "static/media/github-icon.svg": "/NEAR-SPS/static/media/github-icon.8216e87d2c4c611ba696bcfaeaccff75.svg",
+    "static/media/twitter-icon.svg": "/NEAR-SPS/static/media/twitter-icon.fc28943b36018f1b48e83a06c25d7f2f.svg",
+    "static/media/telegram-icon.svg": "/NEAR-SPS/static/media/telegram-icon.84cf6037778a49fff997024847443051.svg",
+    "index.html": "/NEAR-SPS/index.html",
+    "static/media/arrow-down-icon.svg": "/NEAR-SPS/static/media/arrow-down-icon.fb6db85400632b1b2d0e8dcb163a0dc6.svg",
+    "static/media/arrow-left-icon.svg": "/NEAR-SPS/static/media/arrow-left-icon.743757af1ba20e9a529f0b0489abbc52.svg",
+    "static/media/arrow-right-icon.svg": "/NEAR-SPS/static/media/arrow-right-icon.2fce0b6d079aa072124e0b00bcbd0402.svg",
+    "main.df0ebd83.css.map": "/NEAR-SPS/static/css/main.df0ebd83.css.map",
+    "main.baabd323.js.map": "/NEAR-SPS/static/js/main.baabd323.js.map",
+    "787.c4e7f8f9.chunk.js.map": "/NEAR-SPS/static/js/787.c4e7f8f9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.df0ebd83.css",
-    "static/js/main.8f3b387e.js"
+    "static/js/main.baabd323.js"
   ]
 }
