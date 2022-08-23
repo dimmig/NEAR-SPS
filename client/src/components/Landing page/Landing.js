@@ -1,10 +1,10 @@
 import React from "react";
 import { Header } from "./Header";
 import display from "../assets/images/display.png";
-import "../assets/styles/landing.css";
 import { HowToUse } from "./HowToUse";
 import { HowItWorks } from "./HowItWorks";
 import { Footer } from "./Footer";
+import "../assets/styles/Landing/landing.css";
 
 export const Landing = () => {
   return (

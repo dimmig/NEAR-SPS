@@ -8,7 +8,7 @@ import teamIcon from "../assets/icons/team-icon.svg";
 import rightArrow from "../assets/icons/arrow-right-icon.svg";
 import leftArrow from "../assets/icons/arrow-left-icon.svg";
 import downArrow from "../assets/icons/arrow-down-icon.svg";
-import "../assets/styles/howItWorks.css";
+import "../assets/styles/Landing/howItWorks.css";
 
 export const HowItWorks = () => {
   return (
@@ -58,8 +58,10 @@ export const HowItWorks = () => {
           </div>
         </div>
         <div className="arrow-down-icon">
+          <div className="fixed-arrow" />
           <img src={downArrow} alt="arrowDown" />
         </div>
+
         <div className="mobile-down-arrow">
           <img src={downArrow} alt="arrow" />
         </div>

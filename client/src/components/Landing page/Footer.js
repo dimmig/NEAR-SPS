@@ -2,7 +2,7 @@ import React from "react";
 import telegramIcon from "../assets/icons/telegram-icon.svg";
 import twitterIcon from "../assets/icons/twitter-icon.svg";
 import githubIcon from "../assets/icons/github-icon.svg";
-import "../assets/styles/footer.css";
+import "../assets/styles/Landing/footer.css";
 
 export const Footer = () => {
   return (

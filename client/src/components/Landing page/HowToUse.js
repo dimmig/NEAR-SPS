@@ -4,7 +4,7 @@ import nearIcon from "../assets/images/near_icon.png";
 import arrow from "../assets/images/right_direct_arrow.png";
 import balanceScreenshot from "../assets/images/balance_screenshot.png";
 import betScreenShot from "../assets/images/bet_screenshot.png";
-import "../assets/styles/howToUse.css";
+import "../assets/styles/Landing/howToUse.css";
 
 export const HowToUse = () => {
   return (
