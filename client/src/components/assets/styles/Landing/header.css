@@ -21,12 +21,13 @@
   outline: none;
   border: 1px solid #fff;
   border-bottom: none;
-  background-color: rgba(0, 128, 105, 0.4);
+  background-color: rgba(0, 128, 105, 0.5);
   color: #ebebeb;
   font-size: 24px;
   text-align: center;
   align-items: center;
   box-shadow: 0px 4px 4px rgba(0, 128, 105, 0.2);
+  line-height: 35px;
 }
 
 .play-button button:hover {
@@ -38,4 +39,28 @@
 .play-button button:active {
   background-color: rgba(0, 128, 105, 0.7);
   box-shadow: 0px 4px 4px rgba(0, 128, 105, 0.5);
+}
+
+.logout-button button {
+  height: 100%;
+  width: 180px;
+  outline: none;
+  border: 1px solid rgba(0, 128, 105, 0.2);
+  border-bottom: none;
+  background-color: #fff;
+  color: rgba(0, 128, 105, 0.5);
+  font-size: 24px;
+  text-align: center;
+  align-items: center;
+  box-shadow: 0px 4px 4px rgba(0, 128, 105, 0.2);
+  line-height: 35px;
+}
+
+.logout-button button:hover {
+  box-shadow: 0px 4px 4px rgba(0, 128, 105, 0.5);
+  cursor: pointer;
+}
+
+.logout-button button:active {
+  background-color: rgba(0, 128, 105, 0.1);
 }

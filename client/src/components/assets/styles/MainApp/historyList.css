@@ -1,0 +1,48 @@
+@import url("https://fonts.googleapis.com/css?family=Jost");
+
+ul {
+  font-family: "Jost";
+  font-size: 40px;
+  padding: 0 5%;
+  margin: 0;
+}
+
+.scrollable-ul {
+  overflow-y: scroll;
+  font-family: "Jost";
+  font-size: 40px;
+  padding: 0 5%;
+  margin: 0;
+  height: 400px;
+}
+
+li {
+  padding: 40px 0;
+  list-style: none;
+}
+
+.list-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.win-color {
+  color: rgba(0, 128, 105, 0.4);
+  margin: 0;
+}
+
+.lose-color {
+  color: rgba(194, 87, 87, 0.7);
+  margin: 0;
+}
+
+.game-date h4 {
+  color: rgba(0, 0, 0, 0.5);
+  margin: 0;
+}
+
+.game-assets h4 {
+  margin: 0;
+}

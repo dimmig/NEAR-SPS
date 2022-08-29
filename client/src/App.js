@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { HashRouter as Router } from "react-router-dom";
 import { Switcher } from "./components/Switcher";
 

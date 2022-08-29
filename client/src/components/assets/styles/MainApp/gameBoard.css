@@ -1,0 +1,129 @@
+@import url("https://fonts.googleapis.com/css?family=Jost");
+
+.game-board {
+  font-family: "Jost";
+  width: 90%;
+  display: flex;
+  justify-content: center;
+  padding: 0 5% 5% 5%;
+  min-width: 1395px;
+  max-width: 90%;
+}
+
+.game-board-card {
+  width: 1230px;
+  height: 450px;
+  background: #eeeeee;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 39px;
+}
+
+.rules-title {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.card-info h5 {
+  margin: 0;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 400;
+  margin: 0;
+  opacity: 0.7;
+}
+
+.rules-title img {
+  height: 30px;
+  width: 30px;
+  cursor: pointer;
+}
+
+.rules-title h4 {
+  text-align: center;
+  font-size: 48px;
+  font-weight: 400;
+  margin: 0;
+}
+
+.hands-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 20px 0;
+  align-items: center;
+  width: 100%;
+}
+
+.after-game-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 20px 0;
+  align-items: center;
+  width: 90%;
+}
+
+.button-win-image {
+  opacity: 1;
+}
+
+.button-image {
+  opacity: 0.5;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.button-image-without-opacity {
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.button-image:hover {
+  opacity: 0.8;
+}
+
+.hands-row button {
+  outline: none;
+  border: none;
+  background-color: #eeeeee;
+}
+
+.full-opacity {
+  opacity: 1;
+}
+
+.red-cross {
+  width: 100px;
+  height: 100px;
+  margin-left: 5%;
+}
+
+.user-item-text {
+  margin: 0;
+  font-size: 24px;
+  opacity: 0.5;
+}
+
+.user-item-text-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0 5%;
+}
+
+.hands-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
