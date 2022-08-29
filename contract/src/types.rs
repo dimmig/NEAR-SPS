@@ -14,6 +14,8 @@ use near_sdk::{
 #[serde(crate = "near_sdk::serde")]
 pub struct Assets {
     pub player_id: AccountId,
+    pub item_number: i8,
+    pub date: String,
     pub assets: U128,
 }
 

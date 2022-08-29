@@ -18,6 +18,8 @@ pub const FT_TRANSFER_TGAS: Gas = Gas(30_000_000_000_000);
 pub enum StorageKey {
     Games,
     GamesWithKey { game_id: AccountId },
+    FinishedGames,
+    FinishedGamesWithKey { game_id: AccountId },
     Assets,
 }
 
@@ -26,6 +28,7 @@ pub enum StorageKey {
 pub struct Storage {
     version: u8,
     games: UnorderedMap<AccountId, TreeMap<GameId, Game>>,
+    finished_games: UnorderedMap<AccountId, TreeMap<GameId, Game>>,
     assets: UnorderedMap<AccountId, U128>,
 }
 
@@ -47,7 +50,32 @@ impl FungibleTokenReceiver for Storage {
             return PromiseOrValue::Value(amount);
         } else {
             let message = serde_json::from_str::<Assets>(&msg).expect("Wrong message format");
-            self.assets.insert(&message.player_id, &message.assets);
+
+            let user_item = message.item_number;
+            let rand = *env::random_seed().get(0).unwrap();
+
+            env::log_str(&format!("RANDOM {}", rand));
+
+            if (rand <= 85 && user_item == 1)
+                || (rand > 85 && rand <= 170 && user_item == 2)
+                || (rand > 170 && rand < 255 && user_item == 3)
+            {
+                let game = Game {
+                    player_id: message.player_id.clone(),
+                    status: String::from("Win"),
+                    date: message.date,
+                    assets: U128(message.assets.0 * 2),
+                };
+                self.add_game(game);
+            } else {
+                let game = Game {
+                    player_id: message.player_id.clone(),
+                    status: String::from("Lose"),
+                    date: message.date,
+                    assets: message.assets,
+                };
+                self.add_game(game);
+            }
 
             return PromiseOrValue::Value(U128(0));
         }
@@ -61,13 +89,12 @@ impl Storage {
         Self {
             version,
             games: UnorderedMap::new(StorageKey::Games),
+            finished_games: UnorderedMap::new(StorageKey::FinishedGames),
             assets: UnorderedMap::new(StorageKey::Assets),
         }
     }
 
-    pub fn add_game(&mut self, game: String) {
-        let game = serde_json::from_str::<Game>(&game).expect("Wrong game format");
-
+    pub fn add_game(&mut self, game: Game) {
         let id = game.get_id();
 
         let mut player_games =
@@ -81,24 +108,48 @@ impl Storage {
             env::panic_str("Game already exists")
         };
 
-        if game.status == String::from("Win") {
-            ft_token::ext(AccountId::new_unchecked(String::from(
-                env::current_account_id(),
-            )))
-            .with_attached_deposit(ONE_YOCTO)
-            .with_static_gas(FT_TRANSFER_TGAS)
-            .ft_transfer(game.player_id.clone(), game.assets, "".to_string())
-            .then(
-                ext_callback::ext(AccountId::new_unchecked(String::from(
-                    env::current_account_id(),
-                )))
-                .send_tokens_to_player_callback(),
-            );
+        player_games.insert(&id, &game);
+
+        self.games.insert(&game.player_id, &player_games);
+    }
+
+    pub fn transfer_tokens_to_winner(&mut self, game: Game) {
+        let mut finished_games = self
+            .finished_games
+            .get(&game.player_id)
+            .unwrap_or(TreeMap::new(StorageKey::FinishedGamesWithKey {
+                game_id: game.player_id.clone(),
+            }));
+        let player_games =
+            self.games
+                .get(&game.player_id)
+                .unwrap_or(TreeMap::new(StorageKey::GamesWithKey {
+                    game_id: game.player_id.clone(),
+                }));
+        let id = game.get_id();
+
+        if finished_games.contains_key(&id) {
+            env::panic_str("Game already exists")
         }
 
-        player_games.insert(&id, &game);
-        self.games.insert(&game.player_id, &player_games);
-        self.assets.remove(&game.player_id);
+        if !player_games.contains_key(&id) {
+            env::panic_str("Game is invalid")
+        }
+
+        if game.status == String::from("Win") {
+            ft_token::ext(AccountId::new_unchecked(String::from("wusn.testnet")))
+                .with_attached_deposit(ONE_YOCTO)
+                .with_static_gas(FT_TRANSFER_TGAS)
+                .ft_transfer(game.player_id.clone(), game.assets, "".to_string())
+                .then(
+                    ext_callback::ext(AccountId::new_unchecked(String::from(
+                        env::current_account_id(),
+                    )))
+                    .send_tokens_to_player_callback(),
+                );
+        }
+        finished_games.insert(&id, &game);
+        self.finished_games.insert(&game.player_id, &finished_games);
     }
 
     #[private]
@@ -159,6 +210,7 @@ mod tests {
         let mut contract = Storage {
             version: 1,
             games: UnorderedMap::new(StorageKey::Games),
+            finished_games: UnorderedMap::new(StorageKey::FinishedGames),
             assets: UnorderedMap::new(StorageKey::Assets),
         };
 
@@ -178,8 +230,6 @@ mod tests {
             assets: U128(10),
         };
 
-        let game_action = serde_json::to_string::<Game>(&game_action).expect("Wrong game format");
-
         contract.add_game(game_action);
 
         assert!(contract.get_games(&player_id).unwrap().len() == 1);
@@ -195,6 +245,7 @@ mod tests {
         let mut contract = Storage {
             version: 1,
             games: UnorderedMap::new(StorageKey::Games),
+            finished_games: UnorderedMap::new(StorageKey::FinishedGames),
             assets: UnorderedMap::new(StorageKey::Assets),
         };
 
@@ -216,9 +267,6 @@ mod tests {
                 assets: U128(15),
             };
 
-            let game_action =
-                serde_json::to_string::<Game>(&game_action).expect("Wrong game format");
-
             contract.add_game(game_action);
             env::log_str(&format!(
                 "First game created for user {}, {:?}",
@@ -228,5 +276,11 @@ mod tests {
         } else {
             env::log_str(&format!("GAMES: {:?}", games))
         };
+    }
+
+    #[test]
+    fn test_random_numbers() {
+        let contract_item = env::random_seed();
+        env::log_str(&format!("Random number {:?}", contract_item))
     }
 }
