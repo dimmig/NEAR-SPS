@@ -1,10 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
-import * as nearApi from "near-api-js";
-import Big from "big.js";
 import { ContextManager } from "../..";
 import userIcon from "../assets/icons/user-icon.svg";
 import usnIcon from "../assets/images/usn_image.png";
-import axios from "axios";
 import ContentLoader from "react-content-loader";
 import "../assets/styles/MainApp/balance.css";
 
@@ -14,7 +11,9 @@ export const Balance = () => {
   const [usnBalance, setUsnBalance] = useState(null);
 
   useEffect(() => {
-    getUsnBalance();
+    if (context.currentUser) {
+      getUsnBalance();
+    }
   });
 
   const signIn = () => {
@@ -33,7 +32,7 @@ export const Balance = () => {
   };
 
   return (
-    <div className="balance">
+    <div className="balance" id="balance">
       {!context.currentUser ? (
         <>
           <div className="play-button balance-wallet-button" id="button">

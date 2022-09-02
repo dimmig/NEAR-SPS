@@ -27,15 +27,36 @@ export const GameHistory = () => {
     const historyList = await contract.get_games({
       player_id: context.currentUser.accountId,
     });
+    let finishedGames = await context.contract.get_finished_games({
+      player_id: context.currentUser.accountId,
+    });
+
     if (historyList !== null) {
       historyList.sort((a, b) => b.date - a.date);
 
-      historyList.map((it) => {
+      for (let i = 0; i < historyList.length; i++) {
+        if (finishedGames !== null) {
+          for (let k = 0; k < finishedGames.length; k++) {
+            if (finishedGames[k].id === historyList[i].id) {
+              finishedGames[k].assets /= 100000000;
+              finishedGames[k].date = new Date(parseInt(finishedGames[k].date))
+                .toString()
+                .split("G")[0];
+              historyList.splice(i, 1);
+            }
+          }
+        }
+      }
+      if (finishedGames === null) {
+        finishedGames = [];
+      }
+      historyList.forEach((it) => {
         it.assets /= 100000000;
         it.date = new Date(parseInt(it.date)).toString().split("G")[0];
+        finishedGames.push(it);
       });
     }
-    setHistory(historyList);
+    setHistory(finishedGames);
   };
 
   return (

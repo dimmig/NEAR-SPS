@@ -1,8 +1,8 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { ContextManager } from "../..";
 import usnIcon from "../assets/images/usn_image.png";
-import "../assets/styles/MainApp/bet.css";
 import { FT_TGAS, ONE_YOCTO } from "../constants/near-utils";
+import "../assets/styles/MainApp/bet.css";
 
 export const Bet = () => {
   const context = useContext(ContextManager);
@@ -10,20 +10,23 @@ export const Bet = () => {
   const [betAmount, setBetAmount] = useState(null);
   const [errorText, setErrorText] = useState(null);
 
-  const item = JSON.parse(localStorage.getItem("item-button"));
+  const item = JSON.parse(sessionStorage.getItem("item-button"));
 
   const signIn = () => {
     context.wallet.requestSignIn();
   };
-  useEffect(() => {
-    sessionStorage.removeItem("item-button");
-  }, []);
 
   const onClick = async () => {
-    localStorage.setItem("shouldPlay", true);
     const usnBalance = JSON.parse(localStorage.getItem("usn-balance"));
     const usnContract = context.usnContract.contract;
     const usnConfig = context.usnContract.config;
+
+    if (
+      item === null ||
+      document.getElementById("bet-input").classList.contains("disabled")
+    ) {
+      return setErrorText("Select your item!");
+    }
 
     if (betAmount > usnBalance) {
       return setErrorText("Not enough balance!");
@@ -31,10 +34,6 @@ export const Bet = () => {
 
     if (isNaN(betAmount) || betAmount === null || betAmount === "") {
       return setErrorText("Write valid amount!");
-    }
-
-    if (item === null) {
-      return setErrorText("Select your item!");
     }
 
     const parsedBet = await context.toPrecision(
@@ -48,7 +47,7 @@ export const Bet = () => {
       date: Date.now().toString(),
       assets: parsedBet,
     };
-
+    localStorage.setItem("shouldPlay", true);
     await usnContract.ft_transfer_call(
       {
         receiver_id: context.contractConfig.contractName,
@@ -61,21 +60,26 @@ export const Bet = () => {
   };
 
   return (
-    <div className="bet" id="bet">
-      <div className="bet-content">
+    <div className="bet">
+      <div className="bet-content" id="bet">
         <h4 className="bet-text">BET:</h4>
         <div className="input-col">
           <input
             className="bet-input"
-            onChange={(e) => setBetAmount(e.target.value)}
+            id="bet-input"
+            onChange={(e) => {
+              setBetAmount(e.target.value);
+            }}
           />
+
           {!context.currentUser ? (
             <div className="play-button centered" id="button">
               <button onClick={signIn}>Play</button>
             </div>
           ) : (
             <div className="play-button centered" id="button">
-              {JSON.parse(localStorage.getItem("shouldPlay")) ||
+              {(JSON.parse(localStorage.getItem("shouldPlay")) &&
+                window.location.href.includes("transactionHashes")) ||
               JSON.parse(localStorage.getItem("isModalShown")) ? (
                 <button disabled>Play</button>
               ) : (

@@ -69,3 +69,20 @@
 .history-wallet-button button:hover {
   box-shadow: none;
 }
+
+@media screen and (max-width: 500px) {
+
+
+  .game-history {
+    display: flex;
+    flex-direction: column;
+    min-width: 90%;
+    height: 100%;
+    margin-top: 10%;
+  }
+
+  .history-wallet-button {
+    left: 25%;
+  }
+
+}

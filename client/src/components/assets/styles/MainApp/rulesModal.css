@@ -65,3 +65,21 @@
   width: 40px;
   padding: 0 5%;
 }
+
+@media screen and (max-width: 500px) {
+  .rules-modal {
+    width: 90%;
+    height: 350px;
+    left: 0;
+  }
+  .modal {
+    width: 100%;
+  }
+
+  .modal h4 {
+    font-size: 18px;
+    display: flex;
+    flex-direction: row;
+    margin-left: 10px;
+  }
+}

@@ -21,12 +21,6 @@ export const RulesModal = (props) => {
               document
                 .getElementById("game-board")
                 .classList.remove("blured-bg");
-              document
-                .getElementById("balance-bet-row")
-                .classList.remove("blured-bg");
-              document
-                .getElementById("game-history")
-                .classList.remove("blured-bg");
             }}
           />
         </div>

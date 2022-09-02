@@ -76,7 +76,7 @@ const initContract = async () => {
   }
 
   const contract = new nearApi.Contract(wallet.account(), config.contractName, {
-    viewMethods: ["get_games", "get_user_assets"],
+    viewMethods: ["get_games", "get_user_assets", "get_finished_games"],
     changeMethods: ["add_game", "transfer_tokens_to_winner"],
     sender: wallet.account(),
   });

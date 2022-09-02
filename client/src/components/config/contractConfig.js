@@ -1,4 +1,4 @@
-const SPS_CONTRACT_NAME = process.env.SPS_CONTRACT_NAME || "sps-f.testnet";
+const SPS_CONTRACT_NAME = process.env.SPS_CONTRACT_NAME || "sps-fin.testnet";
 
 export default function contractConfig(env) {
   switch (env) {

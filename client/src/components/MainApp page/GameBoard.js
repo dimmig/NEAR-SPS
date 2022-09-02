@@ -5,9 +5,9 @@ import twoFingersHand from "../assets/images/2-fingers-hand.png";
 import noFingersHand from "../assets/images/no-fingers-hand.png";
 import fiveFingersHand from "../assets/images/5-fingers-hand.png";
 import redCrosss from "../assets/images/red_cross_img.png";
-import "../assets/styles/MainApp/gameBoard.css";
 import { ContextManager } from "../..";
 import { FT_TGAS } from "../constants/near-utils";
+import "../assets/styles/MainApp/gameBoard.css";
 
 export const GameBoard = () => {
   const context = useContext(ContextManager);
@@ -17,11 +17,18 @@ export const GameBoard = () => {
   const [selected, setSelected] = useState(null);
   const [gameStruct, setGameStuct] = useState(null);
   const [gameStatus, setGameStatus] = useState(null);
+  const [button, setButton] = useState(null);
+  const [isWinScreen, setIsWinScreen] = useState(false);
   const [tryAgain, setTryAgain] = useState(false);
-  const [reloadCount, setReloadCount] = useState(0);
-  let [timer, setTimer] = useState(3);
 
-  const item = JSON.parse(localStorage.getItem("item-button"));
+  const item = JSON.parse(sessionStorage.getItem("item-button"));
+
+  useEffect(() => {
+    if (button === null) {
+      document.getElementById("bet-input").classList.add("disabled");
+      document.getElementById("bet-input").setAttribute("disabled", "disabled");
+    }
+  }, []);
 
   const getCurrentGameInfo = async () => {
     const contract = context.contract;
@@ -32,6 +39,7 @@ export const GameBoard = () => {
     games.sort((a, b) => b.date - a.date);
     const currentGame = games[0];
     setGameStuct(currentGame);
+    localStorage.setItem("currentGame", JSON.stringify(currentGame));
     localStorage.setItem("gameStatus", currentGame.status);
 
     setGameStatus(currentGame.status);
@@ -51,23 +59,13 @@ export const GameBoard = () => {
   }, [shouldPlay]);
 
   useEffect(() => {
-    setTimeout(() => {
-      if (timer > 0) {
-        setTimer(timer - 1);
-      }
-    }, 1000);
-  }, [timer]);
-
-  useEffect(() => {
-    if (JSON.parse(localStorage.getItem("shouldPlay"))) {
-      window.addEventListener("unload", (e) => {
-        if (shouldPlay && localStorage.getItem("gameStatus") === "Win") {
-          e.preventDefault();
-          setShouldPlay(false);
-        }
-      });
+    if (
+      JSON.parse(localStorage.getItem("shouldPlay")) &&
+      gameStatus === "Win"
+    ) {
+      setIsWinScreen(true);
     }
-  });
+  }, [isWinScreen]);
 
   const receiveAssets = async () => {
     const contract = context.contract;
@@ -79,9 +77,9 @@ export const GameBoard = () => {
     args.assets = gameStruct.assets;
 
     localStorage.setItem("shouldPlay", false);
-    localStorage.removeItem("item-button");
+    sessionStorage.removeItem("item-button");
     await contract.transfer_tokens_to_winner({
-      callbackUrl: "http://localhost:3000/NEAR-SPS/#/app", //"https://dimmig.github.io/NEAR-SPS/#/app",
+      callbackUrl: "https://dimmig.github.io/NEAR-SPS/#/app",
       args: { game: args },
       gas: FT_TGAS,
     });
@@ -93,7 +91,10 @@ export const GameBoard = () => {
         <></>
       ) : (
         <>
-          {!shouldPlay || typeof context.currentUser === "undefined" ? (
+          {!shouldPlay ||
+          !window.location.href.includes("transactionHashes") ||
+          (!isWinScreen && gameStatus === true) ||
+          typeof context.currentUser === "undefined" ? (
             <>
               <RulesModal isShown={isShown} id="modal" />
               <div className="game-board" id="game-board">
@@ -110,13 +111,6 @@ export const GameBoard = () => {
 
                           document
                             .getElementById("game-board")
-                            .classList.add("blured-bg");
-                          document
-                            .getElementById("balance-bet-row")
-                            .classList.add("blured-bg");
-
-                          document
-                            .getElementById("game-history")
                             .classList.add("blured-bg");
 
                           document
@@ -138,26 +132,27 @@ export const GameBoard = () => {
                   <div className="hands-row">
                     <button
                       onClick={() => {
-                        localStorage.setItem("item-button", 1);
+                        sessionStorage.setItem("item-button", 1);
                         setSelected("You selected stone");
+                        setButton(1);
+
+                        document
+                          .getElementById("bet-input")
+                          .classList.remove("disabled");
+
+                        document
+                          .getElementById("bet-input")
+                          .removeAttribute("disabled");
+
                         document
                           .getElementById("item-btn-1")
-                          .classList.add(
-                            "full-opacity",
-                            "button-image-without-opacity"
-                          );
+                          .classList.add("full-opacity");
                         document
                           .getElementById("item-btn-2")
-                          .classList.remove(
-                            "full-opacity",
-                            "button-image-without-opacity"
-                          );
+                          .classList.remove("full-opacity");
                         document
                           .getElementById("item-btn-3")
-                          .classList.remove(
-                            "full-opacity",
-                            "button-image-without-opacity"
-                          );
+                          .classList.remove("full-opacity");
                       }}
                     >
                       <img
@@ -170,26 +165,27 @@ export const GameBoard = () => {
 
                     <button
                       onClick={() => {
-                        localStorage.setItem("item-button", 2);
+                        sessionStorage.setItem("item-button", 2);
                         setSelected("You selected scissors");
+                        setButton(2);
+
+                        document
+                          .getElementById("bet-input")
+                          .classList.remove("disabled");
+
+                        document
+                          .getElementById("bet-input")
+                          .removeAttribute("disabled");
+
                         document
                           .getElementById("item-btn-2")
-                          .classList.add(
-                            "full-opacity",
-                            "button-image-without-opacity"
-                          );
+                          .classList.add("full-opacity");
                         document
                           .getElementById("item-btn-1")
-                          .classList.remove(
-                            "full-opacity",
-                            "button-image-without-opacity"
-                          );
+                          .classList.remove("full-opacity");
                         document
                           .getElementById("item-btn-3")
-                          .classList.remove(
-                            "full-opacity",
-                            "button-image-without-opacity"
-                          );
+                          .classList.remove("full-opacity");
                       }}
                     >
                       <img
@@ -202,26 +198,27 @@ export const GameBoard = () => {
 
                     <button
                       onClick={() => {
-                        localStorage.setItem("item-button", 3);
+                        sessionStorage.setItem("item-button", 3);
                         setSelected("You selected paper");
+                        setButton(3);
+
+                        document
+                          .getElementById("bet-input")
+                          .classList.remove("disabled");
+
+                        document
+                          .getElementById("bet-input")
+                          .removeAttribute("disabled");
+
                         document
                           .getElementById("item-btn-3")
-                          .classList.add(
-                            "full-opacity",
-                            "button-image-without-opacity"
-                          );
+                          .classList.add("full-opacity");
                         document
                           .getElementById("item-btn-2")
-                          .classList.remove(
-                            "full-opacity",
-                            "button-image-without-opacity"
-                          );
+                          .classList.remove("full-opacity");
                         document
                           .getElementById("item-btn-1")
-                          .classList.remove(
-                            "full-opacity",
-                            "button-image-without-opacity"
-                          );
+                          .classList.remove("full-opacity");
                       }}
                     >
                       <img
@@ -239,139 +236,138 @@ export const GameBoard = () => {
             <div className="game-board" id="game-board">
               <div className="game-board-card">
                 <div className="card-info">
-                  {timer !== 0 ? (
-                    <div className="rules-title">
-                      <h4>{timer}</h4>
-                    </div>
-                  ) : (
-                    <>
-                      {gameStatus === "Win" ? (
-                        <>
-                          <div className="rules-title ">
-                            <h4>You won!</h4>
-                          </div>
-                          <div className="user-item-text-row">
-                            <h4 className="user-item-text">
-                              {context.currentUser.accountId} item
-                            </h4>
-                            <h4 className="user-item-text">
-                              {context.contractConfig.contractName} item
-                            </h4>
-                          </div>
-                          {item === 1 ? (
-                            <div className="hands-column ">
-                              <div className="after-game-row ">
-                                <img
-                                  src={twoFingersHand}
-                                  alt="twoFingersHand"
-                                  id="item-btn-2"
-                                  className="button-win-image"
-                                />
-                                <img
-                                  src={redCrosss}
-                                  alt="redCross"
-                                  className="red-cross"
-                                />
-                                <img
-                                  src={fiveFingersHand}
-                                  alt="fiveFingersHand"
-                                  id="item-btn-3"
-                                  className="button-win-image"
-                                />
-                              </div>
-                              <div className="play-button">
-                                <button onClick={receiveAssets}>
-                                  Receive assets
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <></>
-                          )}
-
-                          {item === 2 ? (
-                            <div className="hands-column">
-                              <div className="after-game-row">
-                                <img
-                                  src={twoFingersHand}
-                                  alt="noFingersHand"
-                                  id="item-btn-2"
-                                  className="button-win-image"
-                                />
-                                <img
-                                  src={redCrosss}
-                                  alt="redCross"
-                                  className="red-cross"
-                                />
-                                <img
-                                  src={fiveFingersHand}
-                                  alt="twoFingersHand"
-                                  id="item-btn-3"
-                                  className="button-win-image"
-                                />
-                              </div>
-                              <div className="play-button">
-                                <button onClick={receiveAssets}>
-                                  Receive assets
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <></>
-                          )}
-                          {item === 3 ? (
-                            <div className="hands-column">
-                              <div className="after-game-row">
-                                <img
-                                  src={twoFingersHand}
-                                  alt="fiveFingersHand"
-                                  id="item-btn-2"
-                                  className="button-win-image"
-                                />
-                                <img
-                                  src={redCrosss}
-                                  alt="redCross"
-                                  className="red-cross"
-                                />
-                                <img
-                                  src={fiveFingersHand}
-                                  alt="noFingersHand"
-                                  id="item-btn-3"
-                                  className="button-win-image"
-                                />
-                              </div>
-                              <div className="play-button">
-                                <button onClick={receiveAssets}>
-                                  Receive assets
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <></>
-                          )}
-                        </>
-                      ) : (
-                        <div className="hands-column">
-                          <div className="rules-title ">
-                            <h4>You lose!</h4>
-                          </div>
-                          <div className="play-button">
-                            <button
-                              onClick={() => {
-                                localStorage.removeItem("shouldPlay");
-                                localStorage.removeItem("item-button");
-                                setShouldPlay(false);
-                                setTryAgain(true);
-                                window.location.reload();
-                              }}
-                            >
-                              Try again
-                            </button>
-                          </div>
+                  <>
+                    {gameStatus === "Win" || isWinScreen ? (
+                      <>
+                        <div className="rules-title ">
+                          <h4>You won!</h4>
                         </div>
-                      )}
-                    </>
-                  )}
+                        <div className="user-item-text-row">
+                          <h4 className="user-item-text">
+                            {context.currentUser.accountId} item
+                          </h4>
+                          <h4 className="user-item-text">
+                            {context.contractConfig.contractName} item
+                          </h4>
+                        </div>
+                        {item === 1 ? (
+                          <div className="hands-column ">
+                            <div className="after-game-row ">
+                              <img
+                                src={twoFingersHand}
+                                alt="twoFingersHand"
+                                id="item-btn-2"
+                                className="button-win-image"
+                              />
+                              <img
+                                src={redCrosss}
+                                alt="redCross"
+                                className="red-cross"
+                              />
+                              <img
+                                src={fiveFingersHand}
+                                alt="fiveFingersHand"
+                                id="item-btn-3"
+                                className="button-win-image"
+                              />
+                            </div>
+                            <div className="play-button">
+                              <button onClick={receiveAssets}>
+                                Receive assets
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <></>
+                        )}
+
+                        {item === 2 ? (
+                          <div className="hands-column">
+                            <div className="after-game-row">
+                              <img
+                                src={twoFingersHand}
+                                alt="noFingersHand"
+                                id="item-btn-2"
+                                className="button-win-image"
+                              />
+                              <img
+                                src={redCrosss}
+                                alt="redCross"
+                                className="red-cross"
+                              />
+                              <img
+                                src={fiveFingersHand}
+                                alt="twoFingersHand"
+                                id="item-btn-3"
+                                className="button-win-image"
+                              />
+                            </div>
+                            <div className="play-button">
+                              <button onClick={receiveAssets}>
+                                Receive assets
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <></>
+                        )}
+                        {item === 3 ? (
+                          <div className="hands-column">
+                            <div className="after-game-row">
+                              <img
+                                src={twoFingersHand}
+                                alt="fiveFingersHand"
+                                id="item-btn-2"
+                                className="button-win-image"
+                              />
+                              <img
+                                src={redCrosss}
+                                alt="redCross"
+                                className="red-cross"
+                              />
+                              <img
+                                src={fiveFingersHand}
+                                alt="noFingersHand"
+                                id="item-btn-3"
+                                className="button-win-image"
+                              />
+                            </div>
+                            <div className="play-button">
+                              <button onClick={receiveAssets}>
+                                Receive assets
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <></>
+                        )}
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                    {gameStatus === "Lose" ? (
+                      <div className="hands-column">
+                        <div className="rules-title ">
+                          <h4>You lose!</h4>
+                        </div>
+                        <div className="play-button">
+                          <button
+                            onClick={() => {
+                              localStorage.removeItem("shouldPlay");
+                              sessionStorage.removeItem("item-button");
+                              setShouldPlay(false);
+                              setTryAgain(true);
+                              window.location.reload();
+                            }}
+                          >
+                            Try again
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <></>
+                    )}
+                  </>
                 </div>
               </div>
             </div>

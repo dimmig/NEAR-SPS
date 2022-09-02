@@ -7,6 +7,13 @@ body {
   overflow-x: hidden;
 }
 
+.desktop {
+  display: block;
+}
+.mobile {
+  display: none;
+}
+
 .container {
   width: 100%;
   height: 100%;
@@ -38,4 +45,20 @@ body {
   -ms-filter: blur(3px);
   filter: blur(3px);
   user-select: none;
+}
+
+@media screen and (max-width: 500px) {
+  .balance-bet-row {
+    padding: 15% 5% 10% 5%;
+    display: flex;
+    flex-direction: column;
+    min-width: 90%;
+    z-index: 1;
+  }
+  .desktop {
+    display: none;
+  }
+  .mobile {
+    display: block;
+  }
 }
