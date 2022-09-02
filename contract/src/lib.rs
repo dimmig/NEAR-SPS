@@ -13,6 +13,7 @@ mod types;
 
 pub const ONE_YOCTO: u128 = 1;
 pub const FT_TRANSFER_TGAS: Gas = Gas(30_000_000_000_000);
+pub const RESERVE_TGAS: Gas = Gas(50_000_000_000_000);
 
 #[derive(BorshSerialize, BorshStorageKey)]
 pub enum StorageKey {
@@ -51,6 +52,10 @@ impl FungibleTokenReceiver for Storage {
         } else {
             let message = serde_json::from_str::<Assets>(&msg).expect("Wrong message format");
 
+            if amount != message.assets {
+                env::panic_str("Not valid amount");
+            }
+
             let user_item = message.item_number;
             let rand = *env::random_seed().get(0).unwrap();
 
@@ -66,6 +71,7 @@ impl FungibleTokenReceiver for Storage {
                     date: message.date,
                     assets: U128(message.assets.0 * 2),
                 };
+
                 self.add_game(game);
             } else {
                 let game = Game {
@@ -74,6 +80,7 @@ impl FungibleTokenReceiver for Storage {
                     date: message.date,
                     assets: message.assets,
                 };
+
                 self.add_game(game);
             }
 
@@ -104,9 +111,21 @@ impl Storage {
                     game_id: game.player_id.clone(),
                 }));
 
-        if player_games.contains_key(&id) {
+        let mut finished_games = self
+            .finished_games
+            .get(&game.player_id)
+            .unwrap_or(TreeMap::new(StorageKey::FinishedGamesWithKey {
+                game_id: game.player_id.clone(),
+            }));
+
+        if player_games.contains_key(&id) || finished_games.contains_key(&id) {
             env::panic_str("Game already exists")
         };
+
+        if game.status == String::from("Win") {
+            finished_games.insert(&id, &game);
+            self.finished_games.insert(&game.player_id, &finished_games);
+        }
 
         player_games.insert(&id, &game);
 
@@ -114,21 +133,22 @@ impl Storage {
     }
 
     pub fn transfer_tokens_to_winner(&mut self, game: Game) {
-        let mut finished_games = self
-            .finished_games
-            .get(&game.player_id)
-            .unwrap_or(TreeMap::new(StorageKey::FinishedGamesWithKey {
-                game_id: game.player_id.clone(),
-            }));
         let player_games =
             self.games
                 .get(&game.player_id)
                 .unwrap_or(TreeMap::new(StorageKey::GamesWithKey {
                     game_id: game.player_id.clone(),
                 }));
+
+        let finished_games = self
+            .finished_games
+            .get(&game.player_id)
+            .unwrap_or(TreeMap::new(StorageKey::FinishedGamesWithKey {
+                game_id: game.player_id.clone(),
+            }));
         let id = game.get_id();
 
-        if finished_games.contains_key(&id) {
+        if player_games.contains_key(&id) && !finished_games.contains_key(&id) {
             env::panic_str("Game already exists")
         }
 
@@ -136,24 +156,30 @@ impl Storage {
             env::panic_str("Game is invalid")
         }
 
-        if game.status == String::from("Win") {
-            ft_token::ext(AccountId::new_unchecked(String::from("wusn.testnet")))
-                .with_attached_deposit(ONE_YOCTO)
-                .with_static_gas(FT_TRANSFER_TGAS)
-                .ft_transfer(game.player_id.clone(), game.assets, "".to_string())
-                .then(
-                    ext_callback::ext(AccountId::new_unchecked(String::from(
-                        env::current_account_id(),
-                    )))
-                    .send_tokens_to_player_callback(),
-                );
+        let currrent_game = player_games.get(&id).unwrap();
+
+        if game.status == String::from("Lose") && currrent_game.status == String::from("Lose") {
+            env::panic_str("Invalid game status")
         }
-        finished_games.insert(&id, &game);
-        self.finished_games.insert(&game.player_id, &finished_games);
+
+        let gas_for_next_callback =
+            env::prepaid_gas() - env::used_gas() - FT_TRANSFER_TGAS - RESERVE_TGAS;
+
+        ft_token::ext(AccountId::new_unchecked(String::from("wusn.testnet")))
+            .with_attached_deposit(ONE_YOCTO)
+            .with_static_gas(FT_TRANSFER_TGAS)
+            .ft_transfer(game.player_id.clone(), game.assets, "".to_string())
+            .then(
+                ext_callback::ext(AccountId::new_unchecked(String::from(
+                    env::current_account_id(),
+                )))
+                .with_static_gas(gas_for_next_callback)
+                .send_tokens_to_player_callback(game.player_id, id),
+            );
     }
 
     #[private]
-    pub fn send_tokens_to_player_callback(&self) {
+    pub fn send_tokens_to_player_callback(&mut self, player_id: AccountId, id: GameId) {
         assert_eq!(
             env::promise_results_count(),
             1,
@@ -164,6 +190,19 @@ impl Storage {
         match env::promise_result(0) {
             PromiseResult::Failed => env::log_str("Failed transfer tokens to player"),
             PromiseResult::Successful(_) => {
+                let mut finished_games = self
+                    .finished_games
+                    .get(&player_id)
+                    .unwrap_or_else(|| env::panic_str("Internal error"));
+
+                finished_games.remove(&id);
+
+                if finished_games.len() == 0 {
+                    self.finished_games.remove(&player_id);
+                } else {
+                    self.finished_games.insert(&player_id, &finished_games);
+                }
+
                 env::log_str("Tokens successfully transfered to player")
             }
             _ => unreachable!(),
@@ -171,6 +210,28 @@ impl Storage {
     }
     pub fn get_games(&self, player_id: &AccountId) -> Option<Vec<GameView>> {
         let games = self.games.get(&player_id);
+
+        if games.is_none() {
+            return None;
+        }
+
+        let games = games.unwrap();
+
+        let mut res = vec![];
+
+        for game in games.iter() {
+            res.push(GameView {
+                id: game.0,
+                status: game.1.status,
+                date: game.1.date,
+                assets: game.1.assets,
+            })
+        }
+        Some(res)
+    }
+
+    pub fn get_finished_games(&self, player_id: &AccountId) -> Option<Vec<GameView>> {
+        let games = self.finished_games.get(&player_id);
 
         if games.is_none() {
             return None;
