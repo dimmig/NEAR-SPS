@@ -18,7 +18,7 @@ export const Header = () => {
 
   return (
     <div className="header">
-      <a href="http://localhost:3000/NEAR-SPS/#">
+      <a href="https://dimmig.github.io/NEAR-SPS/#/">
         <img src={logo} alt="logo" className="logo" />
       </a>
       {!context.currentUser ? (

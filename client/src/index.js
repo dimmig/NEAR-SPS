@@ -31,11 +31,6 @@ const fromPrecision = async (token, amount) => {
   return Big(amount).div(Big(10).pow(decimals.decimals)).round(6).toFixed(2);
 };
 
-const toPrecision = async (token, amount) => {
-  const decimals = await viewFunction(token, "ft_metadata");
-  return Big(amount).mul(Big(10).pow(decimals.decimals)).round(6).toFixed();
-};
-
 const initUsnContract = async () => {
   const config = usnContractConfig("testnet" || process.env.NEAR_ENV);
 
@@ -90,7 +85,6 @@ const initContract = async () => {
     wallet,
     viewFunction,
     fromPrecision,
-    toPrecision,
     usnContract,
   };
   return vaule;

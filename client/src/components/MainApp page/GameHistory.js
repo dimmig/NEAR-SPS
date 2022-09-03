@@ -50,7 +50,7 @@ export const GameHistory = () => {
       if (finishedGames === null) {
         finishedGames = [];
       }
-      historyList.forEach((it) => {
+      historyList.forEach(async (it) => {
         it.assets /= 100000000;
         it.date = new Date(parseInt(it.date)).toString().split("G")[0];
         finishedGames.push(it);

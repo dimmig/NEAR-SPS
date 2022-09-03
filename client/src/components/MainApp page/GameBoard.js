@@ -28,7 +28,7 @@ export const GameBoard = () => {
       document.getElementById("bet-input").classList.add("disabled");
       document.getElementById("bet-input").setAttribute("disabled", "disabled");
     }
-  }, []);
+  }, [button]);
 
   const getCurrentGameInfo = async () => {
     const contract = context.contract;
@@ -49,23 +49,18 @@ export const GameBoard = () => {
     if (JSON.parse(localStorage.getItem("shouldPlay"))) {
       getCurrentGameInfo();
     }
-  });
-
-  useEffect(() => {
-    if (JSON.parse(localStorage.getItem("shouldPlay")) && !tryAgain) {
-      return setShouldPlay(true);
-    }
-    setShouldPlay(false);
-  }, [shouldPlay]);
-
-  useEffect(() => {
     if (
       JSON.parse(localStorage.getItem("shouldPlay")) &&
       gameStatus === "Win"
     ) {
       setIsWinScreen(true);
     }
-  }, [isWinScreen]);
+
+    if (JSON.parse(localStorage.getItem("shouldPlay")) && !tryAgain) {
+      return setShouldPlay(true);
+    }
+    setShouldPlay(false);
+  }, [shouldPlay, tryAgain, isWinScreen]);
 
   const receiveAssets = async () => {
     const contract = context.contract;

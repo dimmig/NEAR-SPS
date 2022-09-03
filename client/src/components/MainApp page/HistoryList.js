@@ -10,11 +10,11 @@ export const HistoryList = (props) => {
 
   useEffect(() => {
     if (context.currentUser) {
-      getUnRecievedRewards();
+      getUsnRecievedRewards();
     }
   });
 
-  const getUnRecievedRewards = async () => {
+  const getUsnRecievedRewards = async () => {
     const unRecievedRewards = await context.contract.get_finished_games({
       player_id: context.currentUser.accountId,
     });
