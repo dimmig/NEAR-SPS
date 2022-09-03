@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/NEAR-SPS/static/css/main.c4db418d.css",
-    "main.js": "/NEAR-SPS/static/js/main.f7402f13.js",
+    "main.css": "/NEAR-SPS/static/css/main.c06fcfe7.css",
+    "main.js": "/NEAR-SPS/static/js/main.901cf869.js",
     "static/js/787.c4e7f8f9.chunk.js": "/NEAR-SPS/static/js/787.c4e7f8f9.chunk.js",
     "static/media/red_cross_img.png": "/NEAR-SPS/static/media/red_cross_img.1277e78c9cdad67588b1.png",
     "static/media/display.png": "/NEAR-SPS/static/media/display.ef73b860c1459d0cf518.png",
@@ -20,12 +20,12 @@
     "static/media/arrow-down-icon.svg": "/NEAR-SPS/static/media/arrow-down-icon.fb6db85400632b1b2d0e8dcb163a0dc6.svg",
     "static/media/arrow-left-icon.svg": "/NEAR-SPS/static/media/arrow-left-icon.743757af1ba20e9a529f0b0489abbc52.svg",
     "static/media/arrow-right-icon.svg": "/NEAR-SPS/static/media/arrow-right-icon.2fce0b6d079aa072124e0b00bcbd0402.svg",
-    "main.c4db418d.css.map": "/NEAR-SPS/static/css/main.c4db418d.css.map",
-    "main.f7402f13.js.map": "/NEAR-SPS/static/js/main.f7402f13.js.map",
+    "main.c06fcfe7.css.map": "/NEAR-SPS/static/css/main.c06fcfe7.css.map",
+    "main.901cf869.js.map": "/NEAR-SPS/static/js/main.901cf869.js.map",
     "787.c4e7f8f9.chunk.js.map": "/NEAR-SPS/static/js/787.c4e7f8f9.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.c4db418d.css",
-    "static/js/main.f7402f13.js"
+    "static/css/main.c06fcfe7.css",
+    "static/js/main.901cf869.js"
   ]
 }
