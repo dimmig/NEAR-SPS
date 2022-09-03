@@ -14,15 +14,10 @@ export const MainApp = () => {
 
       <div className="balance-bet-row" id="balance-bet-row">
         <Balance />
-        <div className="mobile">
-          <GameBoard />
-        </div>
+        {window.screen.width <= 500 ? <GameBoard /> : <></>}
         <Bet />
       </div>
-      <div className="desktop">
-        <GameBoard />
-      </div>
-
+      {window.screen.width > 500 ? <GameBoard /> : <></>}
       <GameHistory />
 
       <Footer />

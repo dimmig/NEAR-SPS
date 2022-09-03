@@ -84,12 +84,7 @@
 }
 
 .button-image:hover {
-  opacity: 0.8;
   transform: translateY(-20px);
-}
-
-.button-image:focus {
-  opacity: 1;
 }
 
 .hands-row button {
