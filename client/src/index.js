@@ -26,6 +26,11 @@ const viewFunction = async (contract, method, args = {}) => {
   return JSON.parse(Buffer.from(rawResult.result).toString());
 };
 
+const toPrecision = async (token, amount) => {
+  const decimals = await viewFunction(token, "ft_metadata");
+  return Big(amount).mul(Big(10).pow(decimals.decimals)).round(6);
+};
+
 const fromPrecision = async (token, amount) => {
   const decimals = await viewFunction(token, "ft_metadata");
   return Big(amount).div(Big(10).pow(decimals.decimals)).round(6).toFixed(2);
@@ -84,6 +89,7 @@ const initContract = async () => {
     contractConfig: config,
     wallet,
     viewFunction,
+    toPrecision,
     fromPrecision,
     usnContract,
   };

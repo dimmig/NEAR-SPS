@@ -1,0 +1,37 @@
+@import url("https://fonts.googleapis.com/css?family=Jost");
+
+.alert {
+  width: 400px;
+  height: 50px;
+
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 415px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.win-alert-color {
+  background-color: rgba(0, 128, 105, 0.1);
+}
+
+.lose-alert-color {
+  background-color: rgba(194, 87, 87, 0.1);
+}
+
+.win-message-color {
+  color: rgba(0, 128, 105, 0.6);
+}
+
+.lose-message-color {
+  color: rgba(194, 87, 87, 0.7);
+}
+
+.alert h4 {
+  font-family: "Jost";
+  font-size: 24px;
+  font-weight: 400;
+  margin: 0;
+}

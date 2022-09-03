@@ -7,6 +7,7 @@ import fiveFingersHand from "../assets/images/5-fingers-hand.png";
 import redCrosss from "../assets/images/red_cross_img.png";
 import { ContextManager } from "../..";
 import { FT_TGAS } from "../constants/near-utils";
+import { AlertMessage } from "./Alert";
 import "../assets/styles/MainApp/gameBoard.css";
 
 export const GameBoard = () => {
@@ -17,6 +18,7 @@ export const GameBoard = () => {
   const [selected, setSelected] = useState(null);
   const [gameStruct, setGameStuct] = useState(null);
   const [gameStatus, setGameStatus] = useState(null);
+  const [assets, setAssets] = useState(null);
   const [button, setButton] = useState(null);
   const [isWinScreen, setIsWinScreen] = useState(false);
   const [tryAgain, setTryAgain] = useState(false);
@@ -39,10 +41,12 @@ export const GameBoard = () => {
     games.sort((a, b) => b.date - a.date);
     const currentGame = games[0];
     setGameStuct(currentGame);
+
     localStorage.setItem("currentGame", JSON.stringify(currentGame));
     localStorage.setItem("gameStatus", currentGame.status);
 
     setGameStatus(currentGame.status);
+    setAssets(currentGame.assets / 100000000);
   };
 
   useEffect(() => {
@@ -367,6 +371,11 @@ export const GameBoard = () => {
                     )}
                   </>
                 </div>
+                {window.screen.width > 500 && gameStruct !== null ? (
+                  <AlertMessage variant={gameStatus} rewardAmount={assets} />
+                ) : (
+                  <></>
+                )}
               </div>
             </div>
           )}

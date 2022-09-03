@@ -96,6 +96,7 @@ export const Bet = () => {
       <div className="error-text">
         <h4>{errorText}</h4>
       </div>
+
     </div>
   );
 };
