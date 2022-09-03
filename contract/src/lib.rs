@@ -156,12 +156,6 @@ impl Storage {
             env::panic_str("Game is invalid")
         }
 
-        let currrent_game = player_games.get(&id).unwrap();
-
-        if game.status == String::from("Lose") && currrent_game.status == String::from("Lose") {
-            env::panic_str("Invalid game status")
-        }
-
         let gas_for_next_callback =
             env::prepaid_gas() - env::used_gas() - FT_TRANSFER_TGAS - RESERVE_TGAS;
 
@@ -264,23 +258,29 @@ impl Storage {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use near_sdk::test_utils::accounts;
     use near_sdk::{test_utils::VMContextBuilder, testing_env};
+
+    fn get_context(predecessor_account_id: AccountId) -> VMContextBuilder {
+        let mut builder = VMContextBuilder::new();
+        builder
+            .current_account_id(accounts(0))
+            .signer_account_id(predecessor_account_id.clone())
+            .predecessor_account_id(predecessor_account_id);
+        builder
+    }
 
     #[test]
     fn test_adding_game() {
+        let context = get_context(accounts(1));
+        testing_env!(context.build());
+
         let mut contract = Storage {
             version: 1,
             games: UnorderedMap::new(StorageKey::Games),
             finished_games: UnorderedMap::new(StorageKey::FinishedGames),
             assets: UnorderedMap::new(StorageKey::Assets),
         };
-
-        let mut builder = VMContextBuilder::new();
-        testing_env!(builder
-            .storage_usage(env::storage_usage())
-            .attached_deposit(0)
-            .predecessor_account_id(AccountId::new_unchecked(String::from("dimag.testnet")))
-            .build());
 
         let player_id: AccountId = "rapy.testnet".parse().unwrap();
 
@@ -294,15 +294,13 @@ mod tests {
         contract.add_game(game_action);
 
         assert!(contract.get_games(&player_id).unwrap().len() == 1);
-        env::log_str(&format!(
-            "Games for {}: {:?}",
-            player_id.clone(),
-            contract.get_games(&player_id)
-        ))
     }
 
     #[test]
     fn test_getting_games() {
+        let context = get_context(accounts(2));
+        testing_env!(context.build());
+
         let mut contract = Storage {
             version: 1,
             games: UnorderedMap::new(StorageKey::Games),
@@ -310,38 +308,114 @@ mod tests {
             assets: UnorderedMap::new(StorageKey::Assets),
         };
 
-        let mut builder = VMContextBuilder::new();
-        testing_env!(builder
-            .storage_usage(env::storage_usage())
-            .attached_deposit(0)
-            .predecessor_account_id(AccountId::new_unchecked(String::from("dimag.testnet")))
-            .build());
-
         let player_id: AccountId = "rapy.testnet".parse().unwrap();
 
-        let games = contract.get_games(&player_id);
-        if games.is_none() {
-            let game_action = Game {
-                player_id: player_id.clone(),
-                status: String::from("Win"),
-                date: String::from("July 28, 13:43"),
-                assets: U128(15),
-            };
-
-            contract.add_game(game_action);
-            env::log_str(&format!(
-                "First game created for user {}, {:?}",
-                player_id,
-                contract.get_games(&player_id)
-            ))
-        } else {
-            env::log_str(&format!("GAMES: {:?}", games))
+        let game_action = Game {
+            player_id: player_id.clone(),
+            status: String::from("Win"),
+            date: String::from("July 28, 13:43"),
+            assets: U128(15),
         };
+
+        contract.add_game(game_action.clone());
+
+        assert_eq!(
+            contract.get_games(&player_id).unwrap()[0].assets,
+            game_action.assets
+        )
     }
 
     #[test]
-    fn test_random_numbers() {
-        let contract_item = env::random_seed();
-        env::log_str(&format!("Random number {:?}", contract_item))
+    fn test_getting_finished_games() {
+        let context = get_context(accounts(1));
+        testing_env!(context.build());
+
+        let mut contract = Storage {
+            version: 1,
+            games: UnorderedMap::new(StorageKey::Games),
+            finished_games: UnorderedMap::new(StorageKey::FinishedGames),
+            assets: UnorderedMap::new(StorageKey::Assets),
+        };
+
+        let player_id: AccountId = "rapy.testnet".parse().unwrap();
+
+        let lose_game_action = Game {
+            player_id: player_id.clone(),
+            status: String::from("Lose"),
+            date: String::from("July 28, 13:43"),
+            assets: U128(15),
+        };
+
+        let win_game_action = Game {
+            player_id: player_id.clone(),
+            status: String::from("Win"),
+            date: String::from("July 30, 15:28"),
+            assets: U128(15),
+        };
+        contract.add_game(lose_game_action);
+
+        assert!(contract.get_finished_games(&player_id).is_none());
+        assert_eq!(contract.get_games(&player_id).unwrap().len(), 1);
+
+        contract.add_game(win_game_action);
+
+        assert_eq!(contract.get_finished_games(&player_id).unwrap().len(), 1);
+        assert_eq!(contract.get_games(&player_id).unwrap().len(), 2);
+    }
+
+    #[test]
+    #[should_panic(expected = "Game is invalid")]
+    fn test_getting_rewards_from_invalid_game() {
+        let context = get_context(accounts(1));
+        testing_env!(context.build());
+
+        let mut contract = Storage {
+            version: 1,
+            games: UnorderedMap::new(StorageKey::Games),
+            finished_games: UnorderedMap::new(StorageKey::FinishedGames),
+            assets: UnorderedMap::new(StorageKey::Assets),
+        };
+        let player_id: AccountId = "rapy.testnet".parse().unwrap();
+
+        let game_action = Game {
+            player_id: player_id.clone(),
+            status: String::from("Win"),
+            date: String::from("July 28, 13:43"),
+            assets: U128(15),
+        };
+        contract.add_game(game_action);
+
+        let invalid_game_action = Game {
+            player_id: player_id.clone(),
+            status: String::from("Win"),
+            date: String::from("July 28, 14:43"), //changed date
+            assets: U128(15),
+        };
+        contract.transfer_tokens_to_winner(invalid_game_action);
+        
+    }
+
+    #[test]
+    #[should_panic(expected = "Game already exists")]
+    fn test_adding_existing_game() {
+        let context = get_context(accounts(1));
+        testing_env!(context.build());
+
+        let mut contract = Storage {
+            version: 1,
+            games: UnorderedMap::new(StorageKey::Games),
+            finished_games: UnorderedMap::new(StorageKey::FinishedGames),
+            assets: UnorderedMap::new(StorageKey::Assets),
+        };
+        let player_id: AccountId = "rapy.testnet".parse().unwrap();
+
+        let game_action = Game {
+            player_id: player_id.clone(),
+            status: String::from("Win"),
+            date: String::from("July 28, 13:43"),
+            assets: U128(15),
+        };
+        contract.add_game(game_action.clone());
+        contract.add_game(game_action)
     }
 }
