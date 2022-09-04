@@ -61,8 +61,8 @@
 }
 
 .modal img {
-  height: 40px;
-  width: 40px;
+  height: 60px;
+  width: 60px;
   padding: 0 5%;
 }
 
@@ -76,10 +76,16 @@
     width: 100%;
   }
 
+  .modal img {
+    height: 40px;
+    width: 40px;
+  }
+
   .modal h4 {
     font-size: 18px;
     display: flex;
     flex-direction: row;
-    margin-left: 10px;
+    margin-left: 15px;
+    padding: 0;
   }
 }

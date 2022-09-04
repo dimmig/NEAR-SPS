@@ -1,8 +1,8 @@
 import React from "react";
 import cancelImage from "../assets/images/cancel.png";
-import twoFingersHand from "../assets/images/2-fingers-hand.png";
-import noFingersHand from "../assets/images/no-fingers-hand.png";
-import fiveFingersHand from "../assets/images/5-fingers-hand.png";
+import twoFingersHand from "../assets/images/2_fingers_hand_modal.png";
+import noFingersHand from "../assets/images/no_fingers_hand_modal.png";
+import fiveFingersHand from "../assets/images/5_fingers_hand_modal.png";
 import "../assets/styles/MainApp/rulesModal.css";
 
 export const RulesModal = (props) => {

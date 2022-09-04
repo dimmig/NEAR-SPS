@@ -2,7 +2,7 @@ import React from "react";
 import betScreenShotWithToken from "../assets/images/bet_screenshot_with_token.png";
 import spsContractScreenShot from "../assets/images/sps_contract_screen.png";
 import winScreenShot from "../assets/images/win_screenshot.png";
-import loseScreenShot from "../assets/images/lose-screenshot.png";
+import loseScreenShot from "../assets/images/lose_screenshot.png";
 import algorithmIcon from "../assets/icons/algorithm-icon.svg";
 import teamIcon from "../assets/icons/team-icon.svg";
 import rightArrow from "../assets/icons/arrow-right-icon.svg";

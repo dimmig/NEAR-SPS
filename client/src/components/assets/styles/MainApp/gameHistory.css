@@ -71,8 +71,6 @@
 }
 
 @media screen and (max-width: 500px) {
-
-
   .game-history {
     display: flex;
     flex-direction: column;
@@ -84,5 +82,8 @@
   .history-wallet-button {
     left: 25%;
   }
-
+  
+  .play-button {
+    margin-left: 15px;
+  }
 }

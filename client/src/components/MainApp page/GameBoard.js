@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
 import { RulesModal } from "./RulesModal";
 import infoIcon from "../assets/icons/info-icon.svg";
-import twoFingersHand from "../assets/images/2-fingers-hand.png";
-import noFingersHand from "../assets/images/no-fingers-hand.png";
-import fiveFingersHand from "../assets/images/5-fingers-hand.png";
+import twoFingersHand from "../assets/images/2_fingers_hand.png";
+import noFingersHand from "../assets/images/no_fingers_hand.png";
+import fiveFingersHand from "../assets/images/5_fingers_hand.png";
 import redCrosss from "../assets/images/red_cross_img.png";
 import { ContextManager } from "../..";
 import { FT_TGAS } from "../constants/near-utils";
