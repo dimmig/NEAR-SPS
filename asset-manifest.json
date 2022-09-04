@@ -1,14 +1,17 @@
 {
   "files": {
-    "main.css": "/NEAR-SPS/static/css/main.44f9e4a7.css",
-    "main.js": "/NEAR-SPS/static/js/main.901cf869.js",
+    "main.css": "/NEAR-SPS/static/css/main.4a05e94e.css",
+    "main.js": "/NEAR-SPS/static/js/main.f47dfc0c.js",
     "static/js/787.c4e7f8f9.chunk.js": "/NEAR-SPS/static/js/787.c4e7f8f9.chunk.js",
     "static/media/red_cross_img.png": "/NEAR-SPS/static/media/red_cross_img.1277e78c9cdad67588b1.png",
     "static/media/display.png": "/NEAR-SPS/static/media/display.ef73b860c1459d0cf518.png",
-    "static/media/no-fingers-hand.png": "/NEAR-SPS/static/media/no-fingers-hand.74da30a9b876b604ade9.png",
-    "static/media/2-fingers-hand.png": "/NEAR-SPS/static/media/2-fingers-hand.792c64f38039a1029a9b.png",
+    "static/media/no_fingers_hand_modal.png": "/NEAR-SPS/static/media/no_fingers_hand_modal.0608ec17f863fe1197d9.png",
+    "static/media/5_fingers_hand_modal.png": "/NEAR-SPS/static/media/5_fingers_hand_modal.61b7a506f9c2e1ff81f4.png",
+    "static/media/2_fingers_hand_modal.png": "/NEAR-SPS/static/media/2_fingers_hand_modal.108411f4aa36a0c22554.png",
+    "static/media/no_fingers_hand.png": "/NEAR-SPS/static/media/no_fingers_hand.74da30a9b876b604ade9.png",
+    "static/media/2_fingers_hand.png": "/NEAR-SPS/static/media/2_fingers_hand.792c64f38039a1029a9b.png",
     "static/media/info-icon.svg": "/NEAR-SPS/static/media/info-icon.45077da80ef354be7aead1a73c1018a9.svg",
-    "static/media/5-fingers-hand.png": "/NEAR-SPS/static/media/5-fingers-hand.f3caf418000bc54672f3.png",
+    "static/media/5_fingers_hand.png": "/NEAR-SPS/static/media/5_fingers_hand.f3caf418000bc54672f3.png",
     "static/media/team-icon.svg": "/NEAR-SPS/static/media/team-icon.2168737cd6c5db70e56acd987189ae1f.svg",
     "static/media/usn_image.png": "/NEAR-SPS/static/media/usn_image.6521cd0d8ce86f3c43ad.png",
     "static/media/algorithm-icon.svg": "/NEAR-SPS/static/media/algorithm-icon.60a0d757ac3e5ae81126602006a76be1.svg",
@@ -20,12 +23,12 @@
     "static/media/arrow-down-icon.svg": "/NEAR-SPS/static/media/arrow-down-icon.fb6db85400632b1b2d0e8dcb163a0dc6.svg",
     "static/media/arrow-left-icon.svg": "/NEAR-SPS/static/media/arrow-left-icon.743757af1ba20e9a529f0b0489abbc52.svg",
     "static/media/arrow-right-icon.svg": "/NEAR-SPS/static/media/arrow-right-icon.2fce0b6d079aa072124e0b00bcbd0402.svg",
-    "main.44f9e4a7.css.map": "/NEAR-SPS/static/css/main.44f9e4a7.css.map",
-    "main.901cf869.js.map": "/NEAR-SPS/static/js/main.901cf869.js.map",
+    "main.4a05e94e.css.map": "/NEAR-SPS/static/css/main.4a05e94e.css.map",
+    "main.f47dfc0c.js.map": "/NEAR-SPS/static/js/main.f47dfc0c.js.map",
     "787.c4e7f8f9.chunk.js.map": "/NEAR-SPS/static/js/787.c4e7f8f9.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.44f9e4a7.css",
-    "static/js/main.901cf869.js"
+    "static/css/main.4a05e94e.css",
+    "static/js/main.f47dfc0c.js"
   ]
 }
