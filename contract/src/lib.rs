@@ -9,6 +9,7 @@ use near_sdk::{near_bindgen, AccountId, PromiseResult};
 use crate::ext_interfaces::*;
 use crate::types::*;
 mod ext_interfaces;
+mod on_transfer;
 mod types;
 
 pub const ONE_YOCTO: u128 = 1;
@@ -16,7 +17,7 @@ pub const FT_TRANSFER_TGAS: Gas = Gas(30_000_000_000_000);
 pub const RESERVE_TGAS: Gas = Gas(50_000_000_000_000);
 
 #[derive(BorshSerialize, BorshStorageKey)]
-pub enum StorageKey {
+pub enum GamesKeys {
     Games,
     GamesWithKey { game_id: AccountId },
     FinishedGames,
@@ -26,78 +27,59 @@ pub enum StorageKey {
 
 #[near_bindgen]
 #[derive(PanicOnDefault, BorshDeserialize, BorshSerialize)]
-pub struct Storage {
+pub struct Games {
     version: u8,
+    token_address: AccountId,
     games: UnorderedMap<AccountId, TreeMap<GameId, Game>>,
     finished_games: UnorderedMap<AccountId, TreeMap<GameId, Game>>,
     assets: UnorderedMap<AccountId, U128>,
 }
 
 #[near_bindgen]
-impl FungibleTokenReceiver for Storage {
-    fn ft_on_transfer(
-        &mut self,
-        sender_id: AccountId,
-        amount: U128,
-        msg: String,
-    ) -> PromiseOrValue<U128> {
-        let token = env::predecessor_account_id();
-        env::log_str(&format!(
-            "Transfered {:?} {} from {}",
-            amount, token, sender_id
-        ));
-
-        if msg.is_empty() {
-            return PromiseOrValue::Value(amount);
-        } else {
-            let message = serde_json::from_str::<Assets>(&msg).expect("Wrong message format");
-
-            if amount != message.assets {
-                env::panic_str("Not valid amount");
-            }
-
-            let user_item = message.item_number;
-            let rand = *env::random_seed().get(0).unwrap();
-
-            env::log_str(&format!("RANDOM {}", rand));
-
-            if (rand <= 85 && user_item == 1)
-                || (rand > 85 && rand <= 170 && user_item == 2)
-                || (rand > 170 && rand < 255 && user_item == 3)
-            {
-                let game = Game {
-                    player_id: message.player_id.clone(),
-                    status: String::from("Win"),
-                    date: message.date,
-                    assets: U128(message.assets.0 * 2),
-                };
-
-                self.add_game(game);
-            } else {
-                let game = Game {
-                    player_id: message.player_id.clone(),
-                    status: String::from("Lose"),
-                    date: message.date,
-                    assets: message.assets,
-                };
-
-                self.add_game(game);
-            }
-
-            return PromiseOrValue::Value(U128(0));
-        }
-    }
-}
-
-#[near_bindgen]
-impl Storage {
+impl Games {
     #[init]
-    pub fn new(version: u8) -> Self {
+    pub fn new(version: u8, token_address: AccountId) -> Self {
         Self {
             version,
-            games: UnorderedMap::new(StorageKey::Games),
-            finished_games: UnorderedMap::new(StorageKey::FinishedGames),
-            assets: UnorderedMap::new(StorageKey::Assets),
+            token_address,
+            games: UnorderedMap::new(GamesKeys::Games),
+            finished_games: UnorderedMap::new(GamesKeys::FinishedGames),
+            assets: UnorderedMap::new(GamesKeys::Assets),
+        }
+    }
+
+    pub fn check_winner(
+        &mut self,
+        user_item: i8,
+        params: Assets,
+        amount: U128,
+        sender_id: AccountId,
+    ) {
+        let rand = *env::random_seed().get(0).unwrap();
+
+        env::log_str(&format!("RANDOM {}", rand));
+
+        if (rand <= 85 && user_item == 1)
+            || (rand > 85 && rand <= 170 && user_item == 2)
+            || (rand > 170 && rand < 255 && user_item == 3)
+        {
+            let game = Game {
+                player_id: sender_id,
+                status: GameStatus::Win,
+                date: params.date,
+                assets: U128(amount.0 * 2),
+            };
+
+            self.add_game(game);
+        } else {
+            let game = Game {
+                player_id: sender_id,
+                status: GameStatus::Lose,
+                date: params.date,
+                assets: amount,
+            };
+
+            self.add_game(game);
         }
     }
 
@@ -107,14 +89,14 @@ impl Storage {
         let mut player_games =
             self.games
                 .get(&game.player_id)
-                .unwrap_or(TreeMap::new(StorageKey::GamesWithKey {
+                .unwrap_or(TreeMap::new(GamesKeys::GamesWithKey {
                     game_id: game.player_id.clone(),
                 }));
 
         let mut finished_games = self
             .finished_games
             .get(&game.player_id)
-            .unwrap_or(TreeMap::new(StorageKey::FinishedGamesWithKey {
+            .unwrap_or(TreeMap::new(GamesKeys::FinishedGamesWithKey {
                 game_id: game.player_id.clone(),
             }));
 
@@ -122,7 +104,7 @@ impl Storage {
             env::panic_str("Game already exists")
         };
 
-        if game.status == String::from("Win") {
+        if game.status == GameStatus::Win {
             finished_games.insert(&id, &game);
             self.finished_games.insert(&game.player_id, &finished_games);
         }
@@ -136,14 +118,14 @@ impl Storage {
         let player_games =
             self.games
                 .get(&game.player_id)
-                .unwrap_or(TreeMap::new(StorageKey::GamesWithKey {
+                .unwrap_or(TreeMap::new(GamesKeys::GamesWithKey {
                     game_id: game.player_id.clone(),
                 }));
 
         let finished_games = self
             .finished_games
             .get(&game.player_id)
-            .unwrap_or(TreeMap::new(StorageKey::FinishedGamesWithKey {
+            .unwrap_or(TreeMap::new(GamesKeys::FinishedGamesWithKey {
                 game_id: game.player_id.clone(),
             }));
         let id = game.get_id();
@@ -159,7 +141,7 @@ impl Storage {
         let gas_for_next_callback =
             env::prepaid_gas() - env::used_gas() - FT_TRANSFER_TGAS - RESERVE_TGAS;
 
-        ft_token::ext(AccountId::new_unchecked(String::from("wusn.testnet")))
+        ft_token::ext(self.token_address.clone())
             .with_attached_deposit(ONE_YOCTO)
             .with_static_gas(FT_TRANSFER_TGAS)
             .ft_transfer(game.player_id.clone(), game.assets, "".to_string())
@@ -275,18 +257,19 @@ mod tests {
         let context = get_context(accounts(1));
         testing_env!(context.build());
 
-        let mut contract = Storage {
+        let mut contract = Games {
             version: 1,
-            games: UnorderedMap::new(StorageKey::Games),
-            finished_games: UnorderedMap::new(StorageKey::FinishedGames),
-            assets: UnorderedMap::new(StorageKey::Assets),
+            token_address: AccountId::new_unchecked(String::from("wusn.testnet")),
+            games: UnorderedMap::new(GamesKeys::Games),
+            finished_games: UnorderedMap::new(GamesKeys::FinishedGames),
+            assets: UnorderedMap::new(GamesKeys::Assets),
         };
 
         let player_id: AccountId = "rapy.testnet".parse().unwrap();
 
         let game_action = Game {
             player_id: player_id.clone(),
-            status: String::from("Win"),
+            status: GameStatus::Win,
             date: String::from("July 28, 13:43"),
             assets: U128(10),
         };
@@ -301,18 +284,19 @@ mod tests {
         let context = get_context(accounts(2));
         testing_env!(context.build());
 
-        let mut contract = Storage {
+        let mut contract = Games {
             version: 1,
-            games: UnorderedMap::new(StorageKey::Games),
-            finished_games: UnorderedMap::new(StorageKey::FinishedGames),
-            assets: UnorderedMap::new(StorageKey::Assets),
+            token_address: AccountId::new_unchecked(String::from("wusn.testnet")),
+            games: UnorderedMap::new(GamesKeys::Games),
+            finished_games: UnorderedMap::new(GamesKeys::FinishedGames),
+            assets: UnorderedMap::new(GamesKeys::Assets),
         };
 
         let player_id: AccountId = "rapy.testnet".parse().unwrap();
 
         let game_action = Game {
             player_id: player_id.clone(),
-            status: String::from("Win"),
+            status: GameStatus::Win,
             date: String::from("July 28, 13:43"),
             assets: U128(15),
         };
@@ -330,25 +314,26 @@ mod tests {
         let context = get_context(accounts(1));
         testing_env!(context.build());
 
-        let mut contract = Storage {
+        let mut contract = Games {
             version: 1,
-            games: UnorderedMap::new(StorageKey::Games),
-            finished_games: UnorderedMap::new(StorageKey::FinishedGames),
-            assets: UnorderedMap::new(StorageKey::Assets),
+            token_address: AccountId::new_unchecked(String::from("wusn.testnet")),
+            games: UnorderedMap::new(GamesKeys::Games),
+            finished_games: UnorderedMap::new(GamesKeys::FinishedGames),
+            assets: UnorderedMap::new(GamesKeys::Assets),
         };
 
         let player_id: AccountId = "rapy.testnet".parse().unwrap();
 
         let lose_game_action = Game {
             player_id: player_id.clone(),
-            status: String::from("Lose"),
+            status: GameStatus::Lose,
             date: String::from("July 28, 13:43"),
             assets: U128(15),
         };
 
         let win_game_action = Game {
             player_id: player_id.clone(),
-            status: String::from("Win"),
+            status: GameStatus::Win,
             date: String::from("July 30, 15:28"),
             assets: U128(15),
         };
@@ -369,17 +354,18 @@ mod tests {
         let context = get_context(accounts(1));
         testing_env!(context.build());
 
-        let mut contract = Storage {
+        let mut contract = Games {
             version: 1,
-            games: UnorderedMap::new(StorageKey::Games),
-            finished_games: UnorderedMap::new(StorageKey::FinishedGames),
-            assets: UnorderedMap::new(StorageKey::Assets),
+            token_address: AccountId::new_unchecked(String::from("wusn.testnet")),
+            games: UnorderedMap::new(GamesKeys::Games),
+            finished_games: UnorderedMap::new(GamesKeys::FinishedGames),
+            assets: UnorderedMap::new(GamesKeys::Assets),
         };
         let player_id: AccountId = "rapy.testnet".parse().unwrap();
 
         let game_action = Game {
             player_id: player_id.clone(),
-            status: String::from("Win"),
+            status: GameStatus::Win,
             date: String::from("July 28, 13:43"),
             assets: U128(15),
         };
@@ -387,12 +373,11 @@ mod tests {
 
         let invalid_game_action = Game {
             player_id: player_id.clone(),
-            status: String::from("Win"),
+            status: GameStatus::Win,
             date: String::from("July 28, 14:43"), //changed date
             assets: U128(15),
         };
         contract.transfer_tokens_to_winner(invalid_game_action);
-        
     }
 
     #[test]
@@ -401,17 +386,18 @@ mod tests {
         let context = get_context(accounts(1));
         testing_env!(context.build());
 
-        let mut contract = Storage {
+        let mut contract = Games {
             version: 1,
-            games: UnorderedMap::new(StorageKey::Games),
-            finished_games: UnorderedMap::new(StorageKey::FinishedGames),
-            assets: UnorderedMap::new(StorageKey::Assets),
+            token_address: AccountId::new_unchecked(String::from("wusn.testnet")),
+            games: UnorderedMap::new(GamesKeys::Games),
+            finished_games: UnorderedMap::new(GamesKeys::FinishedGames),
+            assets: UnorderedMap::new(GamesKeys::Assets),
         };
         let player_id: AccountId = "rapy.testnet".parse().unwrap();
 
         let game_action = Game {
             player_id: player_id.clone(),
-            status: String::from("Win"),
+            status: GameStatus::Win,
             date: String::from("July 28, 13:43"),
             assets: U128(15),
         };

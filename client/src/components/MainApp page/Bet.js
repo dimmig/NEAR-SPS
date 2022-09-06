@@ -29,7 +29,7 @@ export const Bet = () => {
       account_id: config.contractName,
     });
 
-    setContractBalance(balance / 100000000 / 2);
+    setContractBalance((balance / 100000000 / 2).toFixed(2));
   };
 
   const onClick = async () => {
@@ -62,10 +62,8 @@ export const Bet = () => {
     );
 
     const args = {
-      player_id: context.currentUser.accountId,
       item_number: item,
       date: Date.now().toString(),
-      assets: parsedBet,
     };
     localStorage.setItem("shouldPlay", true);
     await usnContract.ft_transfer_call(

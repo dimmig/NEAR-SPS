@@ -10,20 +10,27 @@ use near_sdk::{
     AccountId,
 };
 
+#[derive(
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Debug, PartialEq, Hash,
+)]
+#[serde(crate = "near_sdk::serde")]
+pub enum GameStatus {
+    Win,
+    Lose,
+}
+
 #[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Debug, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Assets {
-    pub player_id: AccountId,
     pub item_number: i8,
     pub date: String,
-    pub assets: U128,
 }
 
 #[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Debug, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Game {
     pub player_id: AccountId,
-    pub status: String,
+    pub status: GameStatus,
     pub date: String,
     pub assets: U128,
 }
@@ -32,7 +39,7 @@ pub struct Game {
 #[serde(crate = "near_sdk::serde")]
 pub struct GameView {
     pub id: GameId,
-    pub status: String,
+    pub status: GameStatus,
     pub date: String,
     pub assets: U128,
 }
