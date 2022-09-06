@@ -22,7 +22,6 @@ pub enum GamesKeys {
     GamesWithKey { game_id: AccountId },
     FinishedGames,
     FinishedGamesWithKey { game_id: AccountId },
-    Assets,
 }
 
 #[near_bindgen]
@@ -32,7 +31,6 @@ pub struct Games {
     token_address: AccountId,
     games: UnorderedMap<AccountId, TreeMap<GameId, Game>>,
     finished_games: UnorderedMap<AccountId, TreeMap<GameId, Game>>,
-    assets: UnorderedMap<AccountId, U128>,
 }
 
 #[near_bindgen]
@@ -44,7 +42,6 @@ impl Games {
             token_address,
             games: UnorderedMap::new(GamesKeys::Games),
             finished_games: UnorderedMap::new(GamesKeys::FinishedGames),
-            assets: UnorderedMap::new(GamesKeys::Assets),
         }
     }
 
@@ -227,14 +224,6 @@ impl Games {
         }
         Some(res)
     }
-
-    pub fn get_user_assets(&self, player_id: AccountId) -> Option<U128> {
-        let user_assets = self.assets.get(&player_id);
-        if user_assets.is_none() {
-            return None;
-        }
-        user_assets
-    }
 }
 
 #[cfg(test)]
@@ -262,7 +251,6 @@ mod tests {
             token_address: AccountId::new_unchecked(String::from("wusn.testnet")),
             games: UnorderedMap::new(GamesKeys::Games),
             finished_games: UnorderedMap::new(GamesKeys::FinishedGames),
-            assets: UnorderedMap::new(GamesKeys::Assets),
         };
 
         let player_id: AccountId = "rapy.testnet".parse().unwrap();
@@ -289,7 +277,6 @@ mod tests {
             token_address: AccountId::new_unchecked(String::from("wusn.testnet")),
             games: UnorderedMap::new(GamesKeys::Games),
             finished_games: UnorderedMap::new(GamesKeys::FinishedGames),
-            assets: UnorderedMap::new(GamesKeys::Assets),
         };
 
         let player_id: AccountId = "rapy.testnet".parse().unwrap();
@@ -319,7 +306,6 @@ mod tests {
             token_address: AccountId::new_unchecked(String::from("wusn.testnet")),
             games: UnorderedMap::new(GamesKeys::Games),
             finished_games: UnorderedMap::new(GamesKeys::FinishedGames),
-            assets: UnorderedMap::new(GamesKeys::Assets),
         };
 
         let player_id: AccountId = "rapy.testnet".parse().unwrap();
@@ -359,7 +345,6 @@ mod tests {
             token_address: AccountId::new_unchecked(String::from("wusn.testnet")),
             games: UnorderedMap::new(GamesKeys::Games),
             finished_games: UnorderedMap::new(GamesKeys::FinishedGames),
-            assets: UnorderedMap::new(GamesKeys::Assets),
         };
         let player_id: AccountId = "rapy.testnet".parse().unwrap();
 
@@ -391,7 +376,6 @@ mod tests {
             token_address: AccountId::new_unchecked(String::from("wusn.testnet")),
             games: UnorderedMap::new(GamesKeys::Games),
             finished_games: UnorderedMap::new(GamesKeys::FinishedGames),
-            assets: UnorderedMap::new(GamesKeys::Assets),
         };
         let player_id: AccountId = "rapy.testnet".parse().unwrap();
 
