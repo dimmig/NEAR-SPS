@@ -59,6 +59,11 @@
   padding-bottom: 5px;
 }
 
+input::placeholder {
+  font-size: 16px;
+  color:rgba(0, 0, 0, 0.2);
+}
+
 .disabled {
   border-bottom: 1px solid rgba(155, 155, 155, 0.4);
 }

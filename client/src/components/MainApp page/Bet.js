@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ContextManager } from "../..";
 import usnIcon from "../assets/images/usn_image.png";
 import { FT_TGAS, ONE_YOCTO } from "../constants/near-utils";
@@ -8,12 +8,28 @@ export const Bet = () => {
   const context = useContext(ContextManager);
 
   const [betAmount, setBetAmount] = useState(null);
+  const [contractBalance, setContractBalance] = useState(null);
   const [errorText, setErrorText] = useState(null);
 
   const item = JSON.parse(sessionStorage.getItem("item-button"));
 
+  useEffect(() => {
+    getUsnContractBalance();
+  });
+
   const signIn = () => {
     context.wallet.requestSignIn();
+  };
+
+  const getUsnContractBalance = async () => {
+    const contract = context.usnContract.contract;
+    const config = context.contractConfig;
+
+    const balance = await contract.ft_balance_of({
+      account_id: config.contractName,
+    });
+
+    setContractBalance(balance / 100000000 / 2);
   };
 
   const onClick = async () => {
@@ -67,6 +83,7 @@ export const Bet = () => {
           <input
             className="bet-input"
             id="bet-input"
+            placeholder={`max - ${contractBalance} USN`}
             onChange={(e) => {
               setBetAmount(e.target.value);
             }}
@@ -96,7 +113,6 @@ export const Bet = () => {
       <div className="error-text">
         <h4>{errorText}</h4>
       </div>
-
     </div>
   );
 };
