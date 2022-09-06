@@ -52,6 +52,10 @@ export const Bet = () => {
       return setErrorText("Write valid amount!");
     }
 
+    if (betAmount > contractBalance) {
+      return setErrorText("Higher than max amount!");
+    }
+
     const parsedBet = await context.toPrecision(
       usnConfig.contractName,
       betAmount
