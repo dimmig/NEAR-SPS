@@ -55,8 +55,8 @@ export const Bet = () => {
     }
     
     if (
-      parseInt(betAmount) > parseInt(contractBalance) &&
-      contractBalance !== null
+      contractBalance !== null &&
+      parseInt(betAmount) > parseInt(contractBalance)
     ) {
       return setErrorText("Higher than max amount!");
     }
