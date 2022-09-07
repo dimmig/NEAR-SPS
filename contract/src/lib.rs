@@ -2,12 +2,15 @@ use near_contract_standards::fungible_token::receiver::FungibleTokenReceiver;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{TreeMap, UnorderedMap};
 use near_sdk::{
-    env, json_types::U128, serde_json, BorshStorageKey, Gas, PanicOnDefault, PromiseOrValue,
+    env, json_types::U128, near_bindgen, serde_json, AccountId, BorshStorageKey, Gas,
+    PanicOnDefault, PromiseOrValue, PromiseResult,
 };
-use near_sdk::{near_bindgen, AccountId, PromiseResult};
 
+use crate::errors::*;
 use crate::ext_interfaces::*;
 use crate::types::*;
+
+mod errors;
 mod ext_interfaces;
 mod on_transfer;
 mod types;
@@ -35,6 +38,7 @@ pub struct Games {
 
 #[near_bindgen]
 impl Games {
+    // init contract state
     #[init]
     pub fn new(version: u8, token_address: AccountId) -> Self {
         Self {
@@ -48,13 +52,11 @@ impl Games {
     pub fn check_winner(
         &mut self,
         user_item: i8,
-        params: Assets,
+        params: GameInfo,
         amount: U128,
         sender_id: AccountId,
     ) {
-        let rand = *env::random_seed().get(0).unwrap();
-
-        env::log_str(&format!("RANDOM {}", rand));
+        let rand = *env::random_seed().get(0).unwrap(); // random number from current block
 
         if (rand <= 85 && user_item == 1)
             || (rand > 85 && rand <= 170 && user_item == 2)
@@ -98,7 +100,7 @@ impl Games {
             }));
 
         if player_games.contains_key(&id) || finished_games.contains_key(&id) {
-            env::panic_str("Game already exists")
+            env::panic_str(ALREADY_EXISTS_ERR)
         };
 
         if game.status == GameStatus::Win {
@@ -128,11 +130,11 @@ impl Games {
         let id = game.get_id();
 
         if player_games.contains_key(&id) && !finished_games.contains_key(&id) {
-            env::panic_str("Game already exists")
+            env::panic_str(ALREADY_EXISTS_ERR)
         }
 
         if !player_games.contains_key(&id) {
-            env::panic_str("Game is invalid")
+            env::panic_str(INVALID_GAME_DATA_ERR)
         }
 
         let gas_for_next_callback =
@@ -166,9 +168,9 @@ impl Games {
                 let mut finished_games = self
                     .finished_games
                     .get(&player_id)
-                    .unwrap_or_else(|| env::panic_str("Internal error"));
+                    .unwrap_or_else(|| env::panic_str(INTERNAL_ERR));
 
-                finished_games.remove(&id);
+                finished_games.remove(&id); // delete game if user received tokens
 
                 if finished_games.len() == 0 {
                     self.finished_games.remove(&player_id);
@@ -181,6 +183,8 @@ impl Games {
             _ => unreachable!(),
         }
     }
+
+    // get all games
     pub fn get_games(&self, player_id: &AccountId) -> Option<Vec<GameView>> {
         let games = self.games.get(&player_id);
 
@@ -203,6 +207,7 @@ impl Games {
         Some(res)
     }
 
+    // get only finished games (with status Win)
     pub fn get_finished_games(&self, player_id: &AccountId) -> Option<Vec<GameView>> {
         let games = self.finished_games.get(&player_id);
 

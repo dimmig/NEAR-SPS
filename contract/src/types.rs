@@ -21,7 +21,7 @@ pub enum GameStatus {
 
 #[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Debug, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
-pub struct Assets {
+pub struct GameInfo {
     pub item_number: i8,
     pub date: String,
 }

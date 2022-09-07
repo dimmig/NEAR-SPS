@@ -1,5 +1,5 @@
 use crate::{
-    env, near_bindgen, serde_json, AccountId, Assets, FungibleTokenReceiver, Games, GamesExt,
+    env, near_bindgen, serde_json, AccountId, FungibleTokenReceiver, GameInfo, Games, GamesExt,
     PromiseOrValue, U128,
 };
 
@@ -20,7 +20,7 @@ impl FungibleTokenReceiver for Games {
         if msg.is_empty() {
             return PromiseOrValue::Value(amount);
         } else {
-            let params = serde_json::from_str::<Assets>(&msg).expect("Wrong params format");
+            let params = serde_json::from_str::<GameInfo>(&msg).expect("Wrong params format");
 
             let user_item = params.item_number;
 
