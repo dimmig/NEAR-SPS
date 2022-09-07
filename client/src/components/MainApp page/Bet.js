@@ -33,7 +33,9 @@ export const Bet = () => {
   };
 
   const onClick = async () => {
-    const usnBalance = JSON.parse(localStorage.getItem("usn-balance"));
+    const usnBalance = parseFloat(
+      JSON.parse(localStorage.getItem("usn-balance"))
+    );
     const usnContract = context.usnContract.contract;
     const usnConfig = context.usnContract.config;
 
@@ -44,15 +46,18 @@ export const Bet = () => {
       return setErrorText("Select your item!");
     }
 
-    if (betAmount > usnBalance) {
+    if (parseFloat(betAmount) > usnBalance) {
       return setErrorText("Not enough balance!");
     }
 
     if (isNaN(betAmount) || betAmount === null || betAmount === "") {
       return setErrorText("Write valid amount!");
     }
-
-    if (betAmount > contractBalance) {
+    
+    if (
+      parseInt(betAmount) > parseInt(contractBalance) &&
+      contractBalance !== null
+    ) {
       return setErrorText("Higher than max amount!");
     }
 

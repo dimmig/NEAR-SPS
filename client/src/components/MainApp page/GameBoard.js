@@ -147,8 +147,6 @@ export const GameBoard = () => {
                           .getElementById("item-btn-1")
                           .classList.add("full-opacity");
 
-                        console.log(document.getElementById("item-btn-1"));
-
                         document
                           .getElementById("item-btn-2")
                           .classList.remove("full-opacity");
