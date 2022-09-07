@@ -1,5 +1,5 @@
 import React from "react";
-import cancelImage from "../assets/images/cancel.png";
+import cancelImage from "../assets/icons/cancel-icon.svg";
 import twoFingersHand from "../assets/images/2_fingers_hand_modal.png";
 import noFingersHand from "../assets/images/no_fingers_hand_modal.png";
 import fiveFingersHand from "../assets/images/5_fingers_hand_modal.png";
@@ -9,10 +9,10 @@ export const RulesModal = (props) => {
   if (props.isShown === true) {
     return (
       <div className="rules-modal" id="modal">
-        <div className="cancel-image">
+        <div className="cancel-icon-block">
           <img
             src={cancelImage}
-            alt="cancelImage"
+            alt="cancelIcon"
             onClick={() => {
               sessionStorage.setItem("isShown", false);
               localStorage.setItem("isModalShown", false);
@@ -22,6 +22,7 @@ export const RulesModal = (props) => {
                 .getElementById("game-board")
                 .classList.remove("blured-bg");
             }}
+            className="cancel-icon"
           />
         </div>
         <div className="modal">
