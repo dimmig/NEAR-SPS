@@ -56,6 +56,13 @@ impl Games {
         amount: U128,
         sender_id: AccountId,
     ) {
+        let player_games =
+            self.games
+                .get(&sender_id)
+                .unwrap_or(TreeMap::new(GamesKeys::GamesWithKey {
+                    game_id: sender_id.clone(),
+                }));
+
         let rand = *env::random_seed().get(0).unwrap(); // random number from current block
 
         if (rand <= 85 && user_item == 1)
@@ -69,6 +76,12 @@ impl Games {
                 assets: U128(amount.0 * 2),
             };
 
+            let id = game.get_id();
+
+            if player_games.contains_key(&id) {
+                env::panic_str(ALREADY_EXISTS_ERR);
+            }
+
             self.add_game(game);
         } else {
             let game = Game {
@@ -77,6 +90,12 @@ impl Games {
                 date: params.date,
                 assets: amount,
             };
+
+            let id = game.get_id();
+
+            if player_games.contains_key(&id) {
+                env::panic_str(ALREADY_EXISTS_ERR);
+            }
 
             self.add_game(game);
         }
