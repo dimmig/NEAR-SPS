@@ -1,6 +1,6 @@
 use crate::{
     env, near_bindgen, serde_json, AccountId, FungibleTokenReceiver, GameInfo, Games, GamesExt,
-    PromiseOrValue, U128,
+    PromiseOrValue, U128, errors::INVALID_TOKEN,
 };
 
 #[near_bindgen]
@@ -12,6 +12,11 @@ impl FungibleTokenReceiver for Games {
         msg: String,
     ) -> PromiseOrValue<U128> {
         let token = env::predecessor_account_id();
+
+        if token != self.token_address {
+            env::panic_str(INVALID_TOKEN);
+        }
+
         env::log_str(&format!(
             "Transfered {:?} {} from {}",
             amount, token, sender_id
