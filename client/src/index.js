@@ -13,7 +13,7 @@ export const ContextManager = createContext(null);
 
 const viewFunction = async (contract, method, args = {}) => {
   const provider = new nearApi.providers.JsonRpcProvider({
-    url: contractConfig(process.env.NEAR_ENV || "testnet").nodeUrl,
+    url: contractConfig(process.env.NEAR_ENV || "mainnet").nodeUrl,
   });
 
   const rawResult = await provider.query({
@@ -37,7 +37,7 @@ const fromPrecision = async (token, amount) => {
 };
 
 const initUsnContract = async () => {
-  const config = usnContractConfig("testnet" || process.env.NEAR_ENV);
+  const config = usnContractConfig("mainnet" || process.env.NEAR_ENV);
 
   const keyStore = new nearApi.keyStores.BrowserLocalStorageKeyStore();
 
@@ -59,7 +59,7 @@ const initUsnContract = async () => {
 };
 
 const initContract = async () => {
-  const config = contractConfig(process.env.NEAR_ENV || "testnet");
+  const config = contractConfig(process.env.NEAR_ENV || "mainnet");
 
   const keyStore = new nearApi.keyStores.BrowserLocalStorageKeyStore();
 

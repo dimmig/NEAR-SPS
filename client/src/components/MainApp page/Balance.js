@@ -26,7 +26,7 @@ export const Balance = () => {
     const balance = await usnContract.ft_balance_of({
       account_id: context.currentUser.accountId,
     });
-    const parsedBalance = await context.fromPrecision("wusn.testnet", balance);
+    const parsedBalance = await context.fromPrecision("usn", balance);
     localStorage.setItem("usn-balance", parsedBalance);
     setUsnBalance(parsedBalance);
   };
