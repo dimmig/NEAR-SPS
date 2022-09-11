@@ -132,7 +132,15 @@ impl Games {
         self.games.insert(&game.player_id, &player_games);
     }
 
+    
     pub fn transfer_tokens_to_winner(&mut self, game: Game) {
+        let signer_account_id = env::signer_account_id();
+
+        // check if signer == player_id
+        if signer_account_id != game.player_id {
+            env::panic_str(SIGNER_ACCOUNT_IS_INVALID); 
+        }
+
         let player_games =
             self.games
                 .get(&game.player_id)
@@ -359,7 +367,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Game is invalid")]
+    #[should_panic(expected = "Game data is invalid")]
     fn test_getting_rewards_from_invalid_game() {
         let context = get_context(accounts(1));
         testing_env!(context.build());
