@@ -45,7 +45,12 @@
 .rules-title img {
   height: 30px;
   width: 30px;
+  transition: all 0.1s ease;
   cursor: pointer;
+}
+
+.rules-title img:hover {
+  opacity: 0.5;
 }
 
 .rules-title h4 {

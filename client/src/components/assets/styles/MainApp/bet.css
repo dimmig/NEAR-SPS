@@ -124,7 +124,7 @@ input::placeholder {
     display: none;
   }
   input::placeholder {
-    font-size: 14px;
+    font-size: 12px;
     color: rgba(0, 0, 0, 0.2);
   }
   .centered {
