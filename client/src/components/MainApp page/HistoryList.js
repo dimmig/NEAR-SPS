@@ -15,23 +15,33 @@ export const HistoryList = (props) => {
   });
 
   const getUsnRecievedRewards = async () => {
-    const unRecievedRewards = await context.contract.get_finished_games({
+    const games = await context.contract.get_games({
       player_id: context.currentUser.accountId,
     });
+    if (games !== null) {
+      const unRecievedRewards = games.filter((game) => !game.payed);
 
-    setRewards(unRecievedRewards);
+      setRewards(unRecievedRewards);
+    }
   };
 
   const receiveAssets = async (id) => {
     const contract = context.contract;
-    const finishedGames = await context.contract.get_finished_games({
+    const games = await context.contract.get_games({
       player_id: context.currentUser.accountId,
     });
+
+    let finishedGames = [];
+    if (games !== null) {
+      finishedGames = games.filter((game) => !game.payed);
+    }
     const gameStruct = finishedGames.filter((game) => game.id === id)[0];
+
     const args = {};
 
     args.player_id = context.currentUser.accountId;
     args.status = gameStruct.status;
+    args.payed = gameStruct.payed;
     args.date = gameStruct.date;
     args.assets = gameStruct.assets;
 

@@ -1,4 +1,4 @@
-const USN_CONTRACT_NAME = process.env.USN_CONTRACT_NAME || "usn";
+const USN_CONTRACT_NAME = process.env.USN_CONTRACT_NAME || "wusn.testnet";
 
 export default function usnContractConfig(env) {
   switch (env) {

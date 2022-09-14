@@ -1,6 +1,6 @@
 use crate::{
-    env, near_bindgen, serde_json, AccountId, FungibleTokenReceiver, GameInfo, Games, GamesExt,
-    PromiseOrValue, U128, errors::INVALID_TOKEN,
+    env, errors::INVALID_TOKEN, near_bindgen, serde_json, AccountId, FungibleTokenReceiver,
+    GameInfo, Games, GamesExt, PromiseOrValue, U128,
 };
 
 #[near_bindgen]
@@ -29,7 +29,7 @@ impl FungibleTokenReceiver for Games {
 
             let user_item = params.item_number;
 
-            self.check_winner(user_item, params, amount, sender_id);
+            self.create_game(user_item, params, amount, sender_id);
 
             return PromiseOrValue::Value(U128(0));
         }

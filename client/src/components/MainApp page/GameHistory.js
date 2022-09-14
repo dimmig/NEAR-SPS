@@ -27,15 +27,15 @@ export const GameHistory = () => {
     const historyList = await contract.get_games({
       player_id: context.currentUser.accountId,
     });
-    let finishedGames = await context.contract.get_finished_games({
-      player_id: context.currentUser.accountId,
-    });
+
+    let finishedGames = [];
 
     if (historyList !== null) {
+      finishedGames = historyList.filter((game) => !game.payed);
       historyList.sort((a, b) => b.date - a.date);
 
-      for (let i = 0; i < historyList.length; i++) {
-        if (finishedGames !== null) {
+      if (finishedGames !== null || finishedGames.length !== 0) {
+        for (let i = 0; i < historyList.length; i++) {
           for (let k = 0; k < finishedGames.length; k++) {
             if (finishedGames[k].id === historyList[i].id) {
               finishedGames[k].assets /= 100000000;
@@ -46,17 +46,17 @@ export const GameHistory = () => {
             }
           }
         }
-      }
-      if (finishedGames === null) {
+      } else {
         finishedGames = [];
       }
+
       historyList.forEach(async (it) => {
         it.assets /= 100000000;
         it.date = new Date(parseInt(it.date)).toString().split("G")[0];
         finishedGames.push(it);
       });
+      setHistory(finishedGames);
     }
-    setHistory(finishedGames);
   };
 
   return (

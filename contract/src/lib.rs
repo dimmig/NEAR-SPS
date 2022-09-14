@@ -22,9 +22,9 @@ pub const RESERVE_TGAS: Gas = Gas(50_000_000_000_000);
 #[derive(BorshSerialize, BorshStorageKey)]
 pub enum GamesKeys {
     Games,
-    GamesWithKey { game_id: AccountId },
+    GamesWithKey { account_id: AccountId },
     FinishedGames,
-    FinishedGamesWithKey { game_id: AccountId },
+    FinishedGamesWithKey { account_id: AccountId },
 }
 
 #[near_bindgen]
@@ -33,7 +33,6 @@ pub struct Games {
     version: u8,
     token_address: AccountId,
     games: UnorderedMap<AccountId, TreeMap<GameId, Game>>,
-    finished_games: UnorderedMap<AccountId, TreeMap<GameId, Game>>,
 }
 
 #[near_bindgen]
@@ -45,11 +44,10 @@ impl Games {
             version,
             token_address,
             games: UnorderedMap::new(GamesKeys::Games),
-            finished_games: UnorderedMap::new(GamesKeys::FinishedGames),
         }
     }
 
-    pub fn check_winner(
+    pub fn create_game(
         &mut self,
         user_item: i8,
         params: GameInfo,
@@ -60,41 +58,39 @@ impl Games {
             self.games
                 .get(&sender_id)
                 .unwrap_or(TreeMap::new(GamesKeys::GamesWithKey {
-                    game_id: sender_id.clone(),
+                    account_id: sender_id.clone(),
                 }));
 
         let rand = *env::random_seed().get(0).unwrap(); // random number from current block
+
+        let mut game = Game {
+            player_id: sender_id,
+            payed: false,
+            status: GameStatus::Win,
+            date: params.date,
+            assets: U128(amount.0 * 2),
+        };
+
+        let id = game.get_id();
+
+        if player_games.contains_key(&id) {
+            env::panic_str(ALREADY_EXISTS);
+        }
 
         if (rand <= 85 && user_item == 1)
             || (rand > 85 && rand <= 170 && user_item == 2)
             || (rand > 170 && rand < 255 && user_item == 3)
         {
-            let game = Game {
-                player_id: sender_id,
-                status: GameStatus::Win,
-                date: params.date,
-                assets: U128(amount.0 * 2),
-            };
-
-            let id = game.get_id();
-
-            if player_games.contains_key(&id) {
-                env::panic_str(ALREADY_EXISTS_ERR);
-            }
-
             self.add_game(game);
         } else {
-            let game = Game {
-                player_id: sender_id,
-                status: GameStatus::Lose,
-                date: params.date,
-                assets: amount,
-            };
+            game.payed = true;
+            game.status = GameStatus::Lose;
+            game.assets = amount;
 
             let id = game.get_id();
 
             if player_games.contains_key(&id) {
-                env::panic_str(ALREADY_EXISTS_ERR);
+                env::panic_str(ALREADY_EXISTS);
             }
 
             self.add_game(game);
@@ -108,60 +104,48 @@ impl Games {
             self.games
                 .get(&game.player_id)
                 .unwrap_or(TreeMap::new(GamesKeys::GamesWithKey {
-                    game_id: game.player_id.clone(),
+                    account_id: game.player_id.clone(),
                 }));
 
-        let mut finished_games = self
-            .finished_games
-            .get(&game.player_id)
-            .unwrap_or(TreeMap::new(GamesKeys::FinishedGamesWithKey {
-                game_id: game.player_id.clone(),
-            }));
-
-        if player_games.contains_key(&id) || finished_games.contains_key(&id) {
-            env::panic_str(ALREADY_EXISTS_ERR)
+        if player_games.contains_key(&id) {
+            env::panic_str(ALREADY_EXISTS)
         };
-
-        if game.status == GameStatus::Win {
-            finished_games.insert(&id, &game);
-            self.finished_games.insert(&game.player_id, &finished_games);
-        }
 
         player_games.insert(&id, &game);
 
         self.games.insert(&game.player_id, &player_games);
     }
 
-    
     pub fn transfer_tokens_to_winner(&mut self, game: Game) {
         let signer_account_id = env::signer_account_id();
 
         // check if signer == player_id
         if signer_account_id != game.player_id {
-            env::panic_str(SIGNER_ACCOUNT_IS_INVALID); 
+            env::panic_str(SIGNER_ACCOUNT_IS_INVALID);
         }
 
         let player_games =
             self.games
                 .get(&game.player_id)
                 .unwrap_or(TreeMap::new(GamesKeys::GamesWithKey {
-                    game_id: game.player_id.clone(),
+                    account_id: game.player_id.clone(),
                 }));
 
-        let finished_games = self
-            .finished_games
-            .get(&game.player_id)
-            .unwrap_or(TreeMap::new(GamesKeys::FinishedGamesWithKey {
-                game_id: game.player_id.clone(),
-            }));
         let id = game.get_id();
 
-        if player_games.contains_key(&id) && !finished_games.contains_key(&id) {
-            env::panic_str(ALREADY_EXISTS_ERR)
+        if game.payed {
+            env::panic_str(INVALID_PAYED_STATUS)
         }
 
         if !player_games.contains_key(&id) {
-            env::panic_str(INVALID_GAME_DATA_ERR)
+            env::panic_str(INVALID_GAME_DATA)
+        }
+
+
+        let current_game = player_games.get(&id).unwrap();       
+        
+        if current_game.payed && !game.payed {
+            env::panic_str(ALREADY_EXISTS);
         }
 
         let gas_for_next_callback =
@@ -192,18 +176,20 @@ impl Games {
         match env::promise_result(0) {
             PromiseResult::Failed => env::log_str("Failed transfer tokens to player"),
             PromiseResult::Successful(_) => {
-                let mut finished_games = self
-                    .finished_games
+                let mut games = self
+                    .games
                     .get(&player_id)
                     .unwrap_or_else(|| env::panic_str(INTERNAL_ERR));
 
-                finished_games.remove(&id); // delete game if user received tokens
+                let mut game = games
+                    .get(&id)
+                    .unwrap_or_else(|| env::panic_str(DOESNT_EXIST));
 
-                if finished_games.len() == 0 {
-                    self.finished_games.remove(&player_id);
-                } else {
-                    self.finished_games.insert(&player_id, &finished_games);
-                }
+                game.payed = true; // changed payed status
+
+                games.insert(&id, &game);
+
+                self.games.insert(&player_id, &games);
 
                 env::log_str("Tokens successfully transfered to player")
             }
@@ -223,35 +209,13 @@ impl Games {
 
         let mut res = vec![];
 
-        for game in games.iter() {
+        for (game_id, game) in games.iter() {
             res.push(GameView {
-                id: game.0,
-                status: game.1.status,
-                date: game.1.date,
-                assets: game.1.assets,
-            })
-        }
-        Some(res)
-    }
-
-    // get only finished games (with status Win)
-    pub fn get_finished_games(&self, player_id: &AccountId) -> Option<Vec<GameView>> {
-        let games = self.finished_games.get(&player_id);
-
-        if games.is_none() {
-            return None;
-        }
-
-        let games = games.unwrap();
-
-        let mut res = vec![];
-
-        for game in games.iter() {
-            res.push(GameView {
-                id: game.0,
-                status: game.1.status,
-                date: game.1.date,
-                assets: game.1.assets,
+                id: game_id,
+                status: game.status,
+                payed: game.payed,
+                date: game.date,
+                assets: game.assets,
             })
         }
         Some(res)
@@ -273,22 +237,22 @@ mod tests {
         builder
     }
 
+    fn build_contract() -> Games {
+        Games::new(1, AccountId::new_unchecked(String::from("wusn.testnet")))
+    }
+
     #[test]
     fn test_adding_game() {
         let context = get_context(accounts(1));
         testing_env!(context.build());
 
-        let mut contract = Games {
-            version: 1,
-            token_address: AccountId::new_unchecked(String::from("wusn.testnet")),
-            games: UnorderedMap::new(GamesKeys::Games),
-            finished_games: UnorderedMap::new(GamesKeys::FinishedGames),
-        };
+        let mut contract = build_contract();
 
         let player_id: AccountId = "rapy.testnet".parse().unwrap();
 
         let game_action = Game {
             player_id: player_id.clone(),
+            payed: false,
             status: GameStatus::Win,
             date: String::from("July 28, 13:43"),
             assets: U128(10),
@@ -304,17 +268,13 @@ mod tests {
         let context = get_context(accounts(2));
         testing_env!(context.build());
 
-        let mut contract = Games {
-            version: 1,
-            token_address: AccountId::new_unchecked(String::from("wusn.testnet")),
-            games: UnorderedMap::new(GamesKeys::Games),
-            finished_games: UnorderedMap::new(GamesKeys::FinishedGames),
-        };
+        let mut contract = build_contract();
 
         let player_id: AccountId = "rapy.testnet".parse().unwrap();
 
         let game_action = Game {
             player_id: player_id.clone(),
+            payed: false,
             status: GameStatus::Win,
             date: String::from("July 28, 13:43"),
             assets: U128(15),
@@ -329,59 +289,20 @@ mod tests {
     }
 
     #[test]
-    fn test_getting_finished_games() {
-        let context = get_context(accounts(1));
-        testing_env!(context.build());
-
-        let mut contract = Games {
-            version: 1,
-            token_address: AccountId::new_unchecked(String::from("wusn.testnet")),
-            games: UnorderedMap::new(GamesKeys::Games),
-            finished_games: UnorderedMap::new(GamesKeys::FinishedGames),
-        };
-
-        let player_id: AccountId = "rapy.testnet".parse().unwrap();
-
-        let lose_game_action = Game {
-            player_id: player_id.clone(),
-            status: GameStatus::Lose,
-            date: String::from("July 28, 13:43"),
-            assets: U128(15),
-        };
-
-        let win_game_action = Game {
-            player_id: player_id.clone(),
-            status: GameStatus::Win,
-            date: String::from("July 30, 15:28"),
-            assets: U128(15),
-        };
-        contract.add_game(lose_game_action);
-
-        assert!(contract.get_finished_games(&player_id).is_none());
-        assert_eq!(contract.get_games(&player_id).unwrap().len(), 1);
-
-        contract.add_game(win_game_action);
-
-        assert_eq!(contract.get_finished_games(&player_id).unwrap().len(), 1);
-        assert_eq!(contract.get_games(&player_id).unwrap().len(), 2);
-    }
-
-    #[test]
     #[should_panic(expected = "Game data is invalid")]
     fn test_getting_rewards_from_invalid_game() {
-        let context = get_context(accounts(1));
+        let mut contract = build_contract();
+
+        let player_id: AccountId = "rapy.testnet".parse().unwrap();
+
+        let context = get_context(player_id.clone());
         testing_env!(context.build());
 
-        let mut contract = Games {
-            version: 1,
-            token_address: AccountId::new_unchecked(String::from("wusn.testnet")),
-            games: UnorderedMap::new(GamesKeys::Games),
-            finished_games: UnorderedMap::new(GamesKeys::FinishedGames),
-        };
-        let player_id: AccountId = "rapy.testnet".parse().unwrap();
+        env::log_str(&format!("Signer id {}", env::signer_account_id()));
 
         let game_action = Game {
             player_id: player_id.clone(),
+            payed: false,
             status: GameStatus::Win,
             date: String::from("July 28, 13:43"),
             assets: U128(15),
@@ -390,11 +311,12 @@ mod tests {
 
         let invalid_game_action = Game {
             player_id: player_id.clone(),
+            payed: false,
             status: GameStatus::Win,
             date: String::from("July 28, 14:43"), //changed date
             assets: U128(15),
         };
-        contract.transfer_tokens_to_winner(invalid_game_action);
+        contract.transfer_tokens_to_winner(invalid_game_action)
     }
 
     #[test]
@@ -403,16 +325,13 @@ mod tests {
         let context = get_context(accounts(1));
         testing_env!(context.build());
 
-        let mut contract = Games {
-            version: 1,
-            token_address: AccountId::new_unchecked(String::from("wusn.testnet")),
-            games: UnorderedMap::new(GamesKeys::Games),
-            finished_games: UnorderedMap::new(GamesKeys::FinishedGames),
-        };
+        let mut contract = build_contract();
+
         let player_id: AccountId = "rapy.testnet".parse().unwrap();
 
         let game_action = Game {
             player_id: player_id.clone(),
+            payed: false,
             status: GameStatus::Win,
             date: String::from("July 28, 13:43"),
             assets: U128(15),

@@ -72,6 +72,7 @@ export const GameBoard = () => {
 
     args.player_id = context.currentUser.accountId;
     args.status = gameStruct.status;
+    args.payed = gameStruct.payed;
     args.date = gameStruct.date;
     args.assets = gameStruct.assets;
 
