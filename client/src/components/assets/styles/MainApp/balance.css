@@ -21,11 +21,11 @@
 
 .balance-wallet-button button {
   background-color: rgba(0, 128, 105, 0.9);
-  box-shadow: none;
+ 
 }
 
 .balance-wallet-button button:hover {
-  box-shadow: none;
+  background-color: rgba(0, 128, 105, 0.8);
 }
 
 .user-name {

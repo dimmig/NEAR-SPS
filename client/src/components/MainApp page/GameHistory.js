@@ -6,7 +6,9 @@ import { HistoryList } from "./HistoryList";
 
 export const GameHistory = () => {
   const context = useContext(ContextManager);
-  const [history, setHistory] = useState(null);
+  const [history, setHistory] = useState([]);
+  const [isNeedToMakeQuery, setIsNeedToMakeQuery] = useState(true);
+  const [element, setElement] = useState(null);
 
   const signIn = () => {
     context.wallet.requestSignIn();
@@ -21,42 +23,34 @@ export const GameHistory = () => {
     }
   }, []);
 
+  const storeGames = (games) => {
+    games.forEach((it) => {
+      it.date = new Date(parseInt(it.date)).toString().split("G")[0];
+      it.status === "Win"
+        ? (it.assets = it.assets / 100000000 / 2) // decimals and half
+        : (it.assets /= 100000000);
+    });
+
+    if (history.length !== 0 && typeof history !== "undefined") {
+      games.map((game) => history.push(game));
+      return setElement(<HistoryList history={history} />);
+    }
+    setHistory(games);
+  };
+
   const getHistory = async () => {
     const contract = context.contract;
 
     const historyList = await contract.get_games({
       player_id: context.currentUser.accountId,
+      from_index: history.length === 0 ? history.length : history.length + 1,
+      limit: 5,
     });
 
-    let finishedGames = [];
-
-    if (historyList !== null) {
-      finishedGames = historyList.filter((game) => !game.payed);
-      historyList.sort((a, b) => b.date - a.date);
-
-      if (finishedGames !== null || finishedGames.length !== 0) {
-        for (let i = 0; i < historyList.length; i++) {
-          for (let k = 0; k < finishedGames.length; k++) {
-            if (finishedGames[k].id === historyList[i].id) {
-              finishedGames[k].assets /= 100000000;
-              finishedGames[k].date = new Date(parseInt(finishedGames[k].date))
-                .toString()
-                .split("G")[0];
-              historyList.splice(i, 1);
-            }
-          }
-        }
-      } else {
-        finishedGames = [];
-      }
-
-      historyList.forEach(async (it) => {
-        it.assets /= 100000000;
-        it.date = new Date(parseInt(it.date)).toString().split("G")[0];
-        finishedGames.push(it);
-      });
-      setHistory(finishedGames);
+    if (historyList.length < 5) {
+      setIsNeedToMakeQuery(false);
     }
+    storeGames(historyList);
   };
 
   return (
@@ -86,7 +80,20 @@ export const GameHistory = () => {
                   <h4>Game History</h4>
                 </div>
               </div>
-              <HistoryList history={history} />
+              <div
+                className="scrollable-ul"
+                onScroll={async (e) => {
+                  const bottom =
+                    e.target.scrollHeight - e.target.scrollTop ===
+                    e.target.clientHeight;
+
+                  if (bottom && isNeedToMakeQuery) {
+                    getHistory();
+                  }
+                }}
+              >
+                {element === null ? <HistoryList history={history} /> : element}
+              </div>
             </div>
           ) : (
             <div className="game-history-card">

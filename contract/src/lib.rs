@@ -23,8 +23,6 @@ pub const RESERVE_TGAS: Gas = Gas(50_000_000_000_000);
 pub enum GamesKeys {
     Games,
     GamesWithKey { account_id: AccountId },
-    FinishedGames,
-    FinishedGamesWithKey { account_id: AccountId },
 }
 
 #[near_bindgen]
@@ -47,7 +45,7 @@ impl Games {
         }
     }
 
-    pub fn create_game(
+    pub(crate) fn create_game(
         &mut self,
         user_item: i8,
         params: GameInfo,
@@ -65,7 +63,6 @@ impl Games {
 
         let mut game = Game {
             player_id: sender_id,
-            payed: false,
             status: GameStatus::Win,
             date: params.date,
             assets: U128(amount.0 * 2),
@@ -81,9 +78,9 @@ impl Games {
             || (rand > 85 && rand <= 170 && user_item == 2)
             || (rand > 170 && rand < 255 && user_item == 3)
         {
-            self.add_game(game);
+            self.add_game(game.clone());
+            self.transfer_tokens_to_winner(game);
         } else {
-            game.payed = true;
             game.status = GameStatus::Lose;
             game.assets = amount;
 
@@ -97,7 +94,7 @@ impl Games {
         }
     }
 
-    pub fn add_game(&mut self, game: Game) {
+    pub (crate) fn add_game(&mut self, game: Game) {
         let id = game.get_id();
 
         let mut player_games =
@@ -105,18 +102,14 @@ impl Games {
                 .get(&game.player_id)
                 .unwrap_or(TreeMap::new(GamesKeys::GamesWithKey {
                     account_id: game.player_id.clone(),
-                }));
-
-        if player_games.contains_key(&id) {
-            env::panic_str(ALREADY_EXISTS)
-        };
+                }));         
 
         player_games.insert(&id, &game);
 
         self.games.insert(&game.player_id, &player_games);
     }
 
-    pub fn transfer_tokens_to_winner(&mut self, game: Game) {
+    pub(crate) fn transfer_tokens_to_winner(&mut self, game: Game) {
         let signer_account_id = env::signer_account_id();
 
         // check if signer == player_id
@@ -133,19 +126,8 @@ impl Games {
 
         let id = game.get_id();
 
-        if game.payed {
-            env::panic_str(INVALID_PAYED_STATUS)
-        }
-
         if !player_games.contains_key(&id) {
             env::panic_str(INVALID_GAME_DATA)
-        }
-
-
-        let current_game = player_games.get(&id).unwrap();       
-        
-        if current_game.payed && !game.payed {
-            env::panic_str(ALREADY_EXISTS);
         }
 
         let gas_for_next_callback =
@@ -160,12 +142,12 @@ impl Games {
                     env::current_account_id(),
                 )))
                 .with_static_gas(gas_for_next_callback)
-                .send_tokens_to_player_callback(game.player_id, id),
+                .send_tokens_to_player_callback(),
             );
     }
 
     #[private]
-    pub fn send_tokens_to_player_callback(&mut self, player_id: AccountId, id: GameId) {
+    pub fn send_tokens_to_player_callback(&mut self) {
         assert_eq!(
             env::promise_results_count(),
             1,
@@ -176,48 +158,40 @@ impl Games {
         match env::promise_result(0) {
             PromiseResult::Failed => env::log_str("Failed transfer tokens to player"),
             PromiseResult::Successful(_) => {
-                let mut games = self
-                    .games
-                    .get(&player_id)
-                    .unwrap_or_else(|| env::panic_str(INTERNAL_ERR));
-
-                let mut game = games
-                    .get(&id)
-                    .unwrap_or_else(|| env::panic_str(DOESNT_EXIST));
-
-                game.payed = true; // changed payed status
-
-                games.insert(&id, &game);
-
-                self.games.insert(&player_id, &games);
-
                 env::log_str("Tokens successfully transfered to player")
             }
             _ => unreachable!(),
         }
     }
 
-    // get all games
-    pub fn get_games(&self, player_id: &AccountId) -> Option<Vec<GameView>> {
+    pub fn get_games(
+        &self,
+        player_id: &AccountId,
+        from_index: i64,
+        limit: i64,
+    ) -> Option<Vec<GameView>> {
         let games = self.games.get(&player_id);
 
-        if games.is_none() {
-            return None;
-        }
-
-        let games = games.unwrap();
+        let mut games = games.unwrap().to_vec();
+        games.sort_by(|a, b| {
+            b.1.date
+                .parse::<i128>()
+                .unwrap()
+                .cmp(&a.1.date.parse().unwrap())
+        });
 
         let mut res = vec![];
 
-        for (game_id, game) in games.iter() {
+        for i in from_index..std::cmp::min(from_index + limit, games.len() as i64) {
+            let (id, game) = games.get(i as usize).expect(DOESNT_EXIST);
             res.push(GameView {
-                id: game_id,
-                status: game.status,
-                payed: game.payed,
-                date: game.date,
+                id: id.to_owned(),
+                status: game.status.clone(),
+                date: game.date.clone(),
                 assets: game.assets,
             })
         }
+
         Some(res)
     }
 }
@@ -252,7 +226,6 @@ mod tests {
 
         let game_action = Game {
             player_id: player_id.clone(),
-            payed: false,
             status: GameStatus::Win,
             date: String::from("July 28, 13:43"),
             assets: U128(10),
@@ -260,7 +233,7 @@ mod tests {
 
         contract.add_game(game_action);
 
-        assert!(contract.get_games(&player_id).unwrap().len() == 1);
+        assert!(contract.get_games(&player_id, 0, 5).unwrap().len() == 1);
     }
 
     #[test]
@@ -274,16 +247,15 @@ mod tests {
 
         let game_action = Game {
             player_id: player_id.clone(),
-            payed: false,
             status: GameStatus::Win,
-            date: String::from("July 28, 13:43"),
+            date: String::from("11111111"),
             assets: U128(15),
         };
 
         contract.add_game(game_action.clone());
-
+ 
         assert_eq!(
-            contract.get_games(&player_id).unwrap()[0].assets,
+            contract.get_games(&player_id, 0, 5).unwrap()[0].assets,
             game_action.assets
         )
     }
@@ -302,7 +274,6 @@ mod tests {
 
         let game_action = Game {
             player_id: player_id.clone(),
-            payed: false,
             status: GameStatus::Win,
             date: String::from("July 28, 13:43"),
             assets: U128(15),
@@ -311,17 +282,15 @@ mod tests {
 
         let invalid_game_action = Game {
             player_id: player_id.clone(),
-            payed: false,
             status: GameStatus::Win,
             date: String::from("July 28, 14:43"), //changed date
             assets: U128(15),
         };
         contract.transfer_tokens_to_winner(invalid_game_action)
     }
-
+    
     #[test]
-    #[should_panic(expected = "Game already exists")]
-    fn test_adding_existing_game() {
+    fn test_sorting_games() {
         let context = get_context(accounts(1));
         testing_env!(context.build());
 
@@ -329,14 +298,35 @@ mod tests {
 
         let player_id: AccountId = "rapy.testnet".parse().unwrap();
 
-        let game_action = Game {
+        let first_game = Game {
             player_id: player_id.clone(),
-            payed: false,
             status: GameStatus::Win,
-            date: String::from("July 28, 13:43"),
+            date: String::from("11111111"),
             assets: U128(15),
         };
-        contract.add_game(game_action.clone());
-        contract.add_game(game_action)
+
+        let second_game = Game {
+            player_id: player_id.clone(),
+            status: GameStatus::Win,
+            date: String::from("22222222"),
+            assets: U128(15),
+        };
+
+        let third_game = Game {
+            player_id: player_id.clone(),
+            status: GameStatus::Win,
+            date: String::from("33333333"),
+            assets: U128(15),
+        };
+
+        contract.add_game(first_game.clone());
+        contract.add_game(second_game);
+        contract.add_game(third_game.clone());
+
+        let games = contract.get_games(&player_id, 0, 5).unwrap();
+
+        assert_eq!(games[0].date, third_game.date);
+
+        assert_eq!(games[2].date, first_game.date)
     }
 }

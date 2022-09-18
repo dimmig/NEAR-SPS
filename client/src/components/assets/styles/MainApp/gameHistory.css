@@ -38,6 +38,7 @@
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
+
 .no-border {
   border-bottom: none;
 }
@@ -63,11 +64,10 @@
 
 .history-wallet-button button {
   background-color: rgba(0, 128, 105, 0.9);
-  box-shadow: none;
 }
 
 .history-wallet-button button:hover {
-  box-shadow: none;
+  background-color: rgba(0, 128, 105, 0.8);
 }
 
 @media screen and (max-width: 500px) {
@@ -82,7 +82,7 @@
   .history-wallet-button {
     left: 25%;
   }
-  
+
   .play-button {
     margin-left: 15px;
   }

@@ -6,7 +6,6 @@ import noFingersHand from "../assets/images/no_fingers_hand.png";
 import fiveFingersHand from "../assets/images/5_fingers_hand.png";
 import redCrosss from "../assets/images/red_cross_img.png";
 import { ContextManager } from "../..";
-import { FT_TGAS } from "../constants/near-utils";
 import { AlertMessage } from "./Alert";
 import "../assets/styles/MainApp/gameBoard.css";
 
@@ -37,8 +36,10 @@ export const GameBoard = () => {
 
     const games = await contract.get_games({
       player_id: context.currentUser.accountId,
+      from_index: 0,
+      limit: 1,
     });
-    games.sort((a, b) => b.date - a.date);
+
     const currentGame = games[0];
     setGameStuct(currentGame);
 
@@ -53,12 +54,6 @@ export const GameBoard = () => {
     if (JSON.parse(localStorage.getItem("shouldPlay"))) {
       getCurrentGameInfo();
     }
-    if (
-      JSON.parse(localStorage.getItem("shouldPlay")) &&
-      gameStatus === "Win"
-    ) {
-      setIsWinScreen(true);
-    }
 
     if (JSON.parse(localStorage.getItem("shouldPlay")) && !tryAgain) {
       return setShouldPlay(true);
@@ -66,35 +61,13 @@ export const GameBoard = () => {
     setShouldPlay(false);
   }, [shouldPlay, tryAgain, isWinScreen]);
 
-  const receiveAssets = async () => {
-    const contract = context.contract;
-    const args = {};
-
-    args.player_id = context.currentUser.accountId;
-    args.status = gameStruct.status;
-    args.payed = gameStruct.payed;
-    args.date = gameStruct.date;
-    args.assets = gameStruct.assets;
-
-    localStorage.setItem("shouldPlay", false);
-    sessionStorage.removeItem("item-button");
-    await contract.transfer_tokens_to_winner({
-      callbackUrl: "https://dimmig.github.io/NEAR-SPS/#/app",
-      args: { game: args },
-      gas: FT_TGAS,
-    });
-  };
-
   return (
     <div>
       {shouldPlay === null ? (
         <></>
       ) : (
         <>
-          {!shouldPlay ||
-          !window.location.href.includes("transactionHashes") ||
-          (!isWinScreen && gameStatus === true) ||
-          typeof context.currentUser === "undefined" ? (
+          {!shouldPlay || typeof context.currentUser === "undefined" ? (
             <>
               <RulesModal isShown={isShown} id="modal" />
               <div className="game-board" id="game-board">
@@ -251,6 +224,7 @@ export const GameBoard = () => {
                             {context.contractConfig.contractName} item
                           </h4>
                         </div>
+
                         {item === 1 ? (
                           <div className="hands-column ">
                             <div className="after-game-row ">
@@ -271,11 +245,6 @@ export const GameBoard = () => {
                                 id="item-btn-3"
                                 className="button-win-image"
                               />
-                            </div>
-                            <div className="play-button">
-                              <button onClick={receiveAssets}>
-                                Receive assets
-                              </button>
                             </div>
                           </div>
                         ) : (
@@ -303,11 +272,6 @@ export const GameBoard = () => {
                                 className="button-win-image"
                               />
                             </div>
-                            <div className="play-button">
-                              <button onClick={receiveAssets}>
-                                Receive assets
-                              </button>
-                            </div>
                           </div>
                         ) : (
                           <></>
@@ -333,11 +297,6 @@ export const GameBoard = () => {
                                 className="button-win-image"
                               />
                             </div>
-                            <div className="play-button">
-                              <button onClick={receiveAssets}>
-                                Receive assets
-                              </button>
-                            </div>
                           </div>
                         ) : (
                           <></>
@@ -346,6 +305,7 @@ export const GameBoard = () => {
                     ) : (
                       <></>
                     )}
+
                     {gameStatus === "Lose" ? (
                       <div className="hands-column">
                         <div className="rules-title ">
@@ -371,7 +331,26 @@ export const GameBoard = () => {
                   </>
                 </div>
                 {window.screen.width > 500 && gameStruct !== null ? (
-                  <AlertMessage variant={gameStatus} rewardAmount={assets} />
+                  <>
+                    <AlertMessage variant={gameStatus} rewardAmount={assets} />
+                    {gameStatus === "Win" ? (
+                      <div className="play-button win-try-again-button">
+                        <button
+                          onClick={() => {
+                            localStorage.removeItem("shouldPlay");
+                            sessionStorage.removeItem("item-button");
+                            setShouldPlay(false);
+                            setTryAgain(true);
+                            window.location.reload();
+                          }}
+                        >
+                          Try again
+                        </button>
+                      </div>
+                    ) : (
+                      <></>
+                    )}
+                  </>
                 ) : (
                   <></>
                 )}

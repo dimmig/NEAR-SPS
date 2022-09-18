@@ -1,4 +1,3 @@
-use crate::types::GameId;
 use near_sdk::json_types::U128;
 use near_sdk::{ext_contract, AccountId, PromiseOrValue};
 
@@ -16,5 +15,5 @@ pub trait FtToken {
 
 #[ext_contract(ext_callback)]
 pub trait ExtCallback {
-    fn send_tokens_to_player_callback(&self, player_id: AccountId, id: GameId);
+    fn send_tokens_to_player_callback(&self);
 }
