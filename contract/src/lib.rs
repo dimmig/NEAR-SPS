@@ -49,7 +49,7 @@ impl Games {
 
     pub fn get_contract_metadata(&self) -> ContractSourceMetadata {
         ContractSourceMetadata {
-            version: "".to_string(), // not empty in deployed contract
+            version: "3334a4164988e1e240ffb87d6388e5d5b28f5a36".to_string(),
             link: "https://github.com/dimmig/NEAR-SPS".to_string(),
         }
     }
