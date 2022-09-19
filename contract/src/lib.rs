@@ -25,6 +25,7 @@ pub enum GamesKeys {
     GamesWithKey { account_id: AccountId },
 }
 
+
 #[near_bindgen]
 #[derive(PanicOnDefault, BorshDeserialize, BorshSerialize)]
 pub struct Games {
@@ -44,6 +45,7 @@ impl Games {
             games: UnorderedMap::new(GamesKeys::Games),
         }
     }
+
 
     pub(crate) fn create_game(
         &mut self,
@@ -171,6 +173,10 @@ impl Games {
         limit: i64,
     ) -> Option<Vec<GameView>> {
         let games = self.games.get(&player_id);
+        
+        if games.is_none() {
+            return None;
+        }
 
         let mut games = games.unwrap().to_vec();
         games.sort_by(|a, b| {
