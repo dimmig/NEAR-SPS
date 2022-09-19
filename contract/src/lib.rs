@@ -5,6 +5,7 @@ use near_sdk::{
     env, json_types::U128, near_bindgen, serde_json, AccountId, BorshStorageKey, Gas,
     PanicOnDefault, PromiseOrValue, PromiseResult,
 };
+use source::ContractSourceMetadata;
 
 use crate::errors::*;
 use crate::ext_interfaces::*;
@@ -13,6 +14,7 @@ use crate::types::*;
 mod errors;
 mod ext_interfaces;
 mod on_transfer;
+mod source;
 mod types;
 
 pub const ONE_YOCTO: u128 = 1;
@@ -24,7 +26,6 @@ pub enum GamesKeys {
     Games,
     GamesWithKey { account_id: AccountId },
 }
-
 
 #[near_bindgen]
 #[derive(PanicOnDefault, BorshDeserialize, BorshSerialize)]
@@ -46,6 +47,12 @@ impl Games {
         }
     }
 
+    pub fn get_contract_metadata(&self) -> ContractSourceMetadata {
+        ContractSourceMetadata {
+            version: "".to_string(), // not empty in deployed contract
+            link: "https://github.com/dimmig/NEAR-SPS".to_string(),
+        }
+    }
 
     pub(crate) fn create_game(
         &mut self,
@@ -96,7 +103,7 @@ impl Games {
         }
     }
 
-    pub (crate) fn add_game(&mut self, game: Game) {
+    pub(crate) fn add_game(&mut self, game: Game) {
         let id = game.get_id();
 
         let mut player_games =
@@ -104,7 +111,7 @@ impl Games {
                 .get(&game.player_id)
                 .unwrap_or(TreeMap::new(GamesKeys::GamesWithKey {
                     account_id: game.player_id.clone(),
-                }));         
+                }));
 
         player_games.insert(&id, &game);
 
@@ -173,7 +180,7 @@ impl Games {
         limit: i64,
     ) -> Option<Vec<GameView>> {
         let games = self.games.get(&player_id);
-        
+
         if games.is_none() {
             return None;
         }
@@ -259,7 +266,7 @@ mod tests {
         };
 
         contract.add_game(game_action.clone());
- 
+
         assert_eq!(
             contract.get_games(&player_id, 0, 5).unwrap()[0].assets,
             game_action.assets
@@ -294,7 +301,7 @@ mod tests {
         };
         contract.transfer_tokens_to_winner(invalid_game_action)
     }
-    
+
     #[test]
     fn test_sorting_games() {
         let context = get_context(accounts(1));
