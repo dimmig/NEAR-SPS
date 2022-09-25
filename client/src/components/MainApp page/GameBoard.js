@@ -40,14 +40,16 @@ export const GameBoard = () => {
       limit: 1,
     });
 
-    const currentGame = games[0];
-    setGameStuct(currentGame);
+    if (games !== null) {
+      const currentGame = games[0];
+      setGameStuct(currentGame);
 
-    localStorage.setItem("currentGame", JSON.stringify(currentGame));
-    localStorage.setItem("gameStatus", currentGame.status);
+      localStorage.setItem("currentGame", JSON.stringify(currentGame));
+      localStorage.setItem("gameStatus", currentGame.status);
 
-    setGameStatus(currentGame.status);
-    setAssets(currentGame.assets / 100000000);
+      setGameStatus(currentGame.status);
+      setAssets(currentGame.assets / 100000000);
+    }
   };
 
   useEffect(() => {

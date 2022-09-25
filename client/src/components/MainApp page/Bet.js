@@ -1,8 +1,15 @@
 import React, { useContext, useEffect, useState } from "react";
 import { ContextManager } from "../..";
 import usnIcon from "../assets/images/usn_image.png";
-import { FT_TGAS, ONE_YOCTO } from "../constants/near-utils";
+import {
+  DEPOSIT,
+  DEPOSIT_GAS,
+  FT_TGAS,
+  ONE_YOCTO,
+} from "../constants/near-utils";
 import "../assets/styles/MainApp/bet.css";
+import { transactions } from "near-api-js";
+import { actionsToTransaction } from "./transactions";
 
 export const Bet = () => {
   const context = useContext(ContextManager);
@@ -32,12 +39,30 @@ export const Bet = () => {
     setContractBalance((balance / 100000000 / 2).toFixed(2));
   };
 
+  const isNeedToDeposit = async () => {
+    const contract = context.contract;
+    const currentUser = context.currentUser.accountId;
+
+    const isRegistered = await contract.storage_balance_of({
+      account_id: currentUser,
+    });
+
+    console.log(isRegistered);
+
+    return !isRegistered;
+  };
+
   const onClick = async () => {
     const usnBalance = parseFloat(
       JSON.parse(localStorage.getItem("usn-balance"))
     );
     const usnContract = context.usnContract.contract;
     const usnConfig = context.usnContract.config;
+
+    const contract = context.contract;
+    const contractConfig = context.contractConfig;
+
+    const currentUser = context.currentUser.accountId;
 
     if (
       item === null ||
@@ -53,7 +78,7 @@ export const Bet = () => {
     if (isNaN(betAmount) || betAmount === null || betAmount === "") {
       return setErrorText("Write valid amount!");
     }
-    
+
     if (
       contractBalance !== null &&
       parseInt(betAmount) > parseInt(contractBalance)
@@ -70,7 +95,55 @@ export const Bet = () => {
       item_number: item,
       date: Date.now().toString(),
     };
+
     localStorage.setItem("shouldPlay", true);
+
+    const isUserRegistered = await isNeedToDeposit();
+
+    if (isUserRegistered) {
+      try {
+        const depositAmount = await contract.storage_balance_bounds();
+
+        const depositAction = {
+          args: { account_id: currentUser, registration_only: true },
+          gas: DEPOSIT_GAS,
+          methodName: "storage_deposit",
+          deposit: depositAmount.min,
+        };
+
+        const depositTransaction = await actionsToTransaction(
+          contractConfig.contractName,
+          context.wallet,
+          [depositAction]
+        );
+
+        const transferAction = {
+          args: {
+            receiver_id: context.contractConfig.contractName,
+            amount: parsedBet,
+            msg: JSON.stringify(args),
+          },
+          gas: FT_TGAS,
+          deposit: ONE_YOCTO,
+          methodName: "ft_transfer_call",
+        };
+
+        const transferTransaction = await actionsToTransaction(
+          usnConfig.contractName,
+          context.wallet,
+          [transferAction]
+        );
+
+        return await context.wallet.requestSignTransactions([
+          depositTransaction,
+          transferTransaction,
+        ]);
+      } catch (e) {
+        console.error(e);
+      }
+      return;
+    }
+
     await usnContract.ft_transfer_call(
       {
         receiver_id: context.contractConfig.contractName,

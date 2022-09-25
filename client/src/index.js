@@ -49,7 +49,7 @@ const initUsnContract = async () => {
     wallet.account(),
     config.contractName,
     {
-      viewMethods: ["ft_balance_of"],
+      viewMethods: ["ft_balance_of", "storage_balance_bounds"],
       changeMethods: ["ft_transfer_call"],
       sender: wallet.account(),
     }
@@ -76,8 +76,8 @@ const initContract = async () => {
   }
 
   const contract = new nearApi.Contract(wallet.account(), config.contractName, {
-    viewMethods: ["get_games", "get_all_games"],
-    changeMethods: ["add_game", "transfer_tokens_to_winner"],
+    viewMethods: ["get_games", "storage_balance_bounds", "storage_balance_of"],
+    changeMethods: ["add_game"],
     sender: wallet.account(),
   });
 

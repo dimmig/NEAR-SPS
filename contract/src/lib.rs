@@ -1,6 +1,7 @@
+use deposit_actions::Account;
 use near_contract_standards::fungible_token::receiver::FungibleTokenReceiver;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::collections::{TreeMap, UnorderedMap};
+use near_sdk::collections::{TreeMap, UnorderedMap, LookupMap};
 use near_sdk::{
     env, json_types::U128, near_bindgen, serde_json, AccountId, BorshStorageKey, Gas,
     PanicOnDefault, PromiseOrValue, PromiseResult,
@@ -16,8 +17,11 @@ mod ext_interfaces;
 mod on_transfer;
 mod source;
 mod types;
+mod storage;
+mod deposit_actions;
 
 pub const ONE_YOCTO: u128 = 1;
+pub const DEPOSIT: f64 = 0.00125;
 pub const FT_TRANSFER_TGAS: Gas = Gas(30_000_000_000_000);
 pub const RESERVE_TGAS: Gas = Gas(50_000_000_000_000);
 
@@ -25,6 +29,7 @@ pub const RESERVE_TGAS: Gas = Gas(50_000_000_000_000);
 pub enum GamesKeys {
     Games,
     GamesWithKey { account_id: AccountId },
+    Accounts
 }
 
 #[near_bindgen]
@@ -33,6 +38,7 @@ pub struct Games {
     version: u8,
     token_address: AccountId,
     games: UnorderedMap<AccountId, TreeMap<GameId, Game>>,
+    accounts: LookupMap<AccountId, Account>
 }
 
 #[near_bindgen]
@@ -44,6 +50,7 @@ impl Games {
             version,
             token_address,
             games: UnorderedMap::new(GamesKeys::Games),
+            accounts: LookupMap::new(GamesKeys::Accounts)
         }
     }
 
@@ -80,7 +87,7 @@ impl Games {
         let id = game.get_id();
 
         if player_games.contains_key(&id) {
-            env::panic_str(ALREADY_EXISTS);
+            env::panic_str(ERR1_ALREADY_EXISTS);
         }
 
         if (rand <= 85 && user_item == 1)
@@ -96,13 +103,14 @@ impl Games {
             let id = game.get_id();
 
             if player_games.contains_key(&id) {
-                env::panic_str(ALREADY_EXISTS);
+                env::panic_str(ERR1_ALREADY_EXISTS);
             }
 
             self.add_game(game);
         }
     }
 
+    #[payable]
     pub(crate) fn add_game(&mut self, game: Game) {
         let id = game.get_id();
 
@@ -123,7 +131,7 @@ impl Games {
 
         // check if signer == player_id
         if signer_account_id != game.player_id {
-            env::panic_str(SIGNER_ACCOUNT_IS_INVALID);
+            env::panic_str(ERR4_SIGNER_ACCOUNT_IS_INVALID);
         }
 
         let player_games =
@@ -136,7 +144,7 @@ impl Games {
         let id = game.get_id();
 
         if !player_games.contains_key(&id) {
-            env::panic_str(INVALID_GAME_DATA)
+            env::panic_str(ERR3_INVALID_GAME_DATA)
         }
 
         let gas_for_next_callback =
@@ -167,7 +175,8 @@ impl Games {
         match env::promise_result(0) {
             PromiseResult::Failed => env::log_str("Failed transfer tokens to player"),
             PromiseResult::Successful(_) => {
-                env::log_str("Tokens successfully transfered to player")
+
+            env::log_str("Tokens successfully transfered to player")
             }
             _ => unreachable!(),
         }
@@ -196,7 +205,7 @@ impl Games {
         let mut res = vec![];
 
         for i in from_index..std::cmp::min(from_index + limit, games.len() as i64) {
-            let (id, game) = games.get(i as usize).expect(DOESNT_EXIST);
+            let (id, game) = games.get(i as usize).expect(ERR2_DOESNT_EXIST);
             res.push(GameView {
                 id: id.to_owned(),
                 status: game.status.clone(),
@@ -212,6 +221,7 @@ impl Games {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use near_contract_standards::storage_management::StorageManagement;
     use near_sdk::test_utils::accounts;
     use near_sdk::{test_utils::VMContextBuilder, testing_env};
 
@@ -341,5 +351,19 @@ mod tests {
         assert_eq!(games[0].date, third_game.date);
 
         assert_eq!(games[2].date, first_game.date)
+    }
+
+    #[test]
+    fn test_storage_usage() {
+        let mut context = get_context(accounts(1));
+        testing_env!(context.attached_deposit(10000000000000000000000).build());
+
+        let mut contract = build_contract();
+        let player_id = AccountId::new_unchecked("rapy.testnet".to_string());
+
+        contract.storage_deposit(Some(player_id.clone()), Some(true));
+
+        let account = contract.internal_get_account(&player_id).unwrap_or_else(|| env::panic_str(ERR2_DOESNT_EXIST));
+        env::log_str(&format!("Account: {:?}", account))
     }
 }

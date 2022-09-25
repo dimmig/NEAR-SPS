@@ -1,7 +1,4 @@
-use crate::{
-    env, errors::INVALID_TOKEN, near_bindgen, serde_json, AccountId, FungibleTokenReceiver,
-    GameInfo, Games, GamesExt, PromiseOrValue, U128,
-};
+use crate::*;
 
 #[near_bindgen]
 impl FungibleTokenReceiver for Games {
@@ -14,7 +11,7 @@ impl FungibleTokenReceiver for Games {
         let token = env::predecessor_account_id();
 
         if token != self.token_address {
-            env::panic_str(INVALID_TOKEN);
+            env::panic_str(ERR5_INVALID_TOKEN);
         }
 
         env::log_str(&format!(

@@ -1,5 +1,10 @@
-pub const ALREADY_EXISTS: &str = "Game already exists";
-pub const DOESNT_EXIST: &str = "Game does not exist";
-pub const INVALID_GAME_DATA: &str = "Game data is invalid";
-pub const SIGNER_ACCOUNT_IS_INVALID: &str = "Signer account is invalid";
-pub const INVALID_TOKEN: &str = "Invalid token";
+pub const ERR1_ALREADY_EXISTS: &str = "Game already exists";
+pub const ERR2_DOESNT_EXIST: &str = "Game does not exist";
+pub const ERR3_INVALID_GAME_DATA: &str = "Game data is invalid";
+pub const ERR4_SIGNER_ACCOUNT_IS_INVALID: &str = "Signer account is invalid";
+pub const ERR5_INVALID_TOKEN: &str = "Invalid token";
+pub const ERR6_DEPOSIT_LESS_THAN_MIN_STORAGE: &str = "Attached deposit is less than required";
+pub const ERR8_INSUFFICIENT_STORAGE: &str = "Insufficient storage";
+pub const ERR9_ACC_NOT_REGISTERED: &str = "Account is not registered";
+pub const ERR10_NO_STORAGE_THAT_CAN_WITHDRAW: &str = "No storage that can be withdrawn";
+pub const  ERR11_STORAGE_WITHDRAW_TOO_MUCH: &str = "Storage withdraw is too much"; 

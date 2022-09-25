@@ -47,10 +47,12 @@ export const GameHistory = () => {
       limit: 5,
     });
 
-    if (historyList.length < 5) {
-      setIsNeedToMakeQuery(false);
+    if (historyList !== null) {
+      if (historyList.length < 5) {
+        setIsNeedToMakeQuery(false);
+      }
+      storeGames(historyList);
     }
-    storeGames(historyList);
   };
 
   return (
@@ -73,7 +75,7 @@ export const GameHistory = () => {
         </>
       ) : (
         <>
-          {history !== null ? (
+          {history !== null && history.length !== 0 ? (
             <div className="game-history-card">
               <div className="history-wrapper">
                 <div className="history-title">
@@ -92,7 +94,11 @@ export const GameHistory = () => {
                   }
                 }}
               >
-                {element === null ? <HistoryList history={history} /> : element}
+                {element === null && history !== null ? (
+                  <HistoryList history={history} />
+                ) : (
+                  element
+                )}
               </div>
             </div>
           ) : (
