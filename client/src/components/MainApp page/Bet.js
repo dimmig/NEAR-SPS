@@ -47,8 +47,6 @@ export const Bet = () => {
       account_id: currentUser,
     });
 
-    console.log(isRegistered);
-
     return !isRegistered;
   };
 
