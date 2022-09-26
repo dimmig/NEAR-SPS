@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/NEAR-SPS/static/css/main.b5f53bc5.css",
-    "main.js": "/NEAR-SPS/static/js/main.ce2b92c8.js",
+    "main.js": "/NEAR-SPS/static/js/main.83e96150.js",
     "static/js/787.c4e7f8f9.chunk.js": "/NEAR-SPS/static/js/787.c4e7f8f9.chunk.js",
     "static/media/red_cross_img.png": "/NEAR-SPS/static/media/red_cross_img.1277e78c9cdad67588b1.png",
     "static/media/display.png": "/NEAR-SPS/static/media/display.ef73b860c1459d0cf518.png",
@@ -25,11 +25,11 @@
     "static/media/arrow-right-icon.svg": "/NEAR-SPS/static/media/arrow-right-icon.2fce0b6d079aa072124e0b00bcbd0402.svg",
     "static/media/info-icon.svg": "/NEAR-SPS/static/media/info-icon.90c1c04a3fc785b7ad440a9781f37c18.svg",
     "main.b5f53bc5.css.map": "/NEAR-SPS/static/css/main.b5f53bc5.css.map",
-    "main.ce2b92c8.js.map": "/NEAR-SPS/static/js/main.ce2b92c8.js.map",
+    "main.83e96150.js.map": "/NEAR-SPS/static/js/main.83e96150.js.map",
     "787.c4e7f8f9.chunk.js.map": "/NEAR-SPS/static/js/787.c4e7f8f9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.b5f53bc5.css",
-    "static/js/main.ce2b92c8.js"
+    "static/js/main.83e96150.js"
   ]
 }
