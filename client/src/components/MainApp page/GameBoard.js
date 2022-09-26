@@ -335,27 +335,23 @@ export const GameBoard = () => {
                 {window.screen.width > 500 && gameStruct !== null ? (
                   <>
                     <AlertMessage variant={gameStatus} rewardAmount={assets} />
-                    {gameStatus === "Win" ? (
-                      <div className="play-button win-try-again-button">
-                        <button
-                          onClick={() => {
-                            localStorage.removeItem("shouldPlay");
-                            sessionStorage.removeItem("item-button");
-                            setShouldPlay(false);
-                            setTryAgain(true);
-                            window.location.reload();
-                          }}
-                        >
-                          Try again
-                        </button>
-                      </div>
-                    ) : (
-                      <></>
-                    )}
                   </>
                 ) : (
                   <></>
                 )}
+                <div className="play-button win-try-again-button">
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem("shouldPlay");
+                      sessionStorage.removeItem("item-button");
+                      setShouldPlay(false);
+                      setTryAgain(true);
+                      window.location.reload();
+                    }}
+                  >
+                    Try again
+                  </button>
+                </div>
               </div>
             </div>
           )}
