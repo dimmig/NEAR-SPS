@@ -339,19 +339,23 @@ export const GameBoard = () => {
                 ) : (
                   <></>
                 )}
-                <div className="play-button win-try-again-button">
-                  <button
-                    onClick={() => {
-                      localStorage.removeItem("shouldPlay");
-                      sessionStorage.removeItem("item-button");
-                      setShouldPlay(false);
-                      setTryAgain(true);
-                      window.location.reload();
-                    }}
-                  >
-                    Try again
-                  </button>
-                </div>
+                {gameStatus === "Win" ? (
+                  <div className="play-button win-try-again-button">
+                    <button
+                      onClick={() => {
+                        localStorage.removeItem("shouldPlay");
+                        sessionStorage.removeItem("item-button");
+                        setShouldPlay(false);
+                        setTryAgain(true);
+                        window.location.reload();
+                      }}
+                    >
+                      Try again
+                    </button>
+                  </div>
+                ) : (
+                  <></>
+                )}
               </div>
             </div>
           )}
