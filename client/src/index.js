@@ -59,7 +59,7 @@ const initUsnContract = async () => {
 };
 
 const initContract = async () => {
-  const config = contractConfig(process.env.NEAR_ENV || "testnet");
+  const config = contractConfig(process.env.NEAR_ENV || "mainnet");
 
   const keyStore = new nearApi.keyStores.BrowserLocalStorageKeyStore();
 
