@@ -52,8 +52,9 @@ impl Account {
     }
 
     pub fn assert_storage_usage(&self) {
+        env::log_str(&format!("NEAR AMOUNT: {}", env::storage_usage()));
         assert!(
-            self.storage_usage() >= self.near_amount,
+            self.storage_usage() <= self.near_amount,
             "{}",
             ERR8_INSUFFICIENT_STORAGE
         );

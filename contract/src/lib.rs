@@ -56,7 +56,7 @@ impl Games {
 
     pub fn get_contract_metadata(&self) -> ContractSourceMetadata {
         ContractSourceMetadata {
-            version: "3334a4164988e1e240ffb87d6388e5d5b28f5a36".to_string(),
+            version: "4a1aa529e4aac4b75b0b52bd71de86a0b5c3fba7".to_string(),
             link: "https://github.com/dimmig/NEAR-SPS".to_string(),
         }
     }
@@ -356,7 +356,7 @@ mod tests {
     #[test]
     fn test_storage_usage() {
         let mut context = get_context(accounts(1));
-        testing_env!(context.attached_deposit(10000000000000000000000).build());
+        testing_env!(context.attached_deposit(9_300_000_000_000_000_000_000).build());
 
         let mut contract = build_contract();
         let player_id = AccountId::new_unchecked("rapy.testnet".to_string());
