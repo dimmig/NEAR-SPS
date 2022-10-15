@@ -19,7 +19,7 @@ export const GameBoard = () => {
   const [gameStatus, setGameStatus] = useState(null);
   const [assets, setAssets] = useState(null);
   const [button, setButton] = useState(null);
-  const [isWinScreen, setIsWinScreen] = useState(false);
+  const [isWinScreen] = useState(false);
   const [tryAgain, setTryAgain] = useState(false);
 
   const item = JSON.parse(sessionStorage.getItem("item-button"));

@@ -34,9 +34,9 @@ export const HistoryList = (props) => {
         ) : (
           <div className="game-assets">
             {it.status === "Win" ? (
-              <h4 className="win-color">+{it.assets} WUSN</h4>
+              <h4 className="win-color">+{it.assets} USN</h4>
             ) : (
-              <h4 className="lose-color">-{it.assets} WUSN</h4>
+              <h4 className="lose-color">-{it.assets} USN</h4>
             )}
           </div>
         )}

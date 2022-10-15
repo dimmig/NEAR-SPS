@@ -1,14 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import { ContextManager } from "../..";
 import usnIcon from "../assets/images/usn_image.png";
-import {
-  DEPOSIT,
+import { 
   DEPOSIT_GAS,
   FT_TGAS,
   ONE_YOCTO,
 } from "../constants/near-utils";
 import "../assets/styles/MainApp/bet.css";
-import { transactions } from "near-api-js";
 import { actionsToTransaction } from "./transactions";
 
 export const Bet = () => {
