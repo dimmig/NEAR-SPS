@@ -350,7 +350,7 @@ export const GameBoard = () => {
                               setShouldPlay(false);
                               setTryAgain(true);
                               window.location.replace(
-                                "http://localhost:3000/NEAR-SPS/#/app"
+                                "https://dimmig.github.io/NEAR-SPS/#/app"
                               );
                             }}
                           >
@@ -379,7 +379,7 @@ export const GameBoard = () => {
                         setShouldPlay(false);
                         setTryAgain(true);
                         window.location.replace(
-                          "http://localhost:3000/NEAR-SPS/#/app"
+                          "https://dimmig.github.io/NEAR-SPS/#/app"
                         );
                       }}
                     >
