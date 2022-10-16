@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { ContextManager } from "../..";
+import Big from "big.js";
 import "../assets/styles/MainApp/gameHistory.css";
 import { HiSTORY } from "../constants/hardcodedData";
 import { HistoryList } from "./HistoryList";
@@ -23,18 +24,28 @@ export const GameHistory = () => {
     }
   }, []);
 
-  const storeGames = (games) => {
+  const storeGames = async (games) => {
+    const decimals = await context.usnContract.contract.ft_metadata();
+
     games.forEach((it) => {
       it.date = new Date(parseInt(it.date)).toString().split("G")[0];
       it.status === "Win"
-        ? (it.assets = it.assets / 100000000 / 2) // decimals and half
-        : (it.assets /= 100000000);
+        ? (it.assets = Big(it.assets)
+            .div(Big(10).pow(decimals.decimals))
+            .round(6)
+            .div(2)
+            .toFixed(2)) // decimals and half
+        : (it.assets = Big(it.assets)
+            .div(Big(10).pow(decimals.decimals))
+            .round(6)
+            .toFixed(2));
     });
 
     if (history.length !== 0 && typeof history !== "undefined") {
       games.map((game) => history.push(game));
       return setElement(<HistoryList history={history} />);
     }
+    localStorage.setItem("gamesLen", history.length);
     setHistory(games);
   };
 

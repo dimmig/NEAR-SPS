@@ -31,8 +31,42 @@ export const GameBoard = () => {
     }
   }, [button]);
 
+  useEffect(() => {
+    const history = parseInt(localStorage.getItem("gamesLen"));
+    const getGames = async () => {
+      return await context.contract.get_games({
+        player_id: context.currentUser.accountId,
+        from_index: history === 0 ? history : history + 1,
+        limit: 1,
+      });
+    };
+    getGames().then((games) => {
+      const param = window.location.href.split("?");
+      if (param.length === 1) {
+        return setShouldPlay(false);
+      }
+
+      const gameTime = new Date(Number(games[0].date))
+        .toISOString()
+        .split("T")[1]
+        .split(".")[0];
+
+      const paramsTime = new Date(Number(param[2].split("=")[1]))
+        .toISOString()
+        .split("T")[1]
+        .split(".")[0];
+
+      if (paramsTime === gameTime && !tryAgain) {
+        getCurrentGameInfo();
+        return setShouldPlay(true);
+      }
+      setShouldPlay(false);
+    });
+  }, []);
+
   const getCurrentGameInfo = async () => {
     const contract = context.contract;
+    const usnConfig = context.usnContract.config;
 
     const games = await contract.get_games({
       player_id: context.currentUser.accountId,
@@ -44,24 +78,19 @@ export const GameBoard = () => {
       const currentGame = games[0];
       setGameStuct(currentGame);
 
+      const parsedAssets = await context.fromPrecision(
+        usnConfig.contractName,
+        currentGame.assets
+      );
+
       localStorage.setItem("currentGame", JSON.stringify(currentGame));
       localStorage.setItem("gameStatus", currentGame.status);
 
       setGameStatus(currentGame.status);
-      setAssets(currentGame.assets / 100000000);
+
+      setAssets(parsedAssets);
     }
   };
-
-  useEffect(() => {
-    if (JSON.parse(localStorage.getItem("shouldPlay"))) {
-      getCurrentGameInfo();
-    }
-
-    if (JSON.parse(localStorage.getItem("shouldPlay")) && !tryAgain) {
-      return setShouldPlay(true);
-    }
-    setShouldPlay(false);
-  }, [shouldPlay, tryAgain, isWinScreen]);
 
   return (
     <div>
@@ -320,7 +349,9 @@ export const GameBoard = () => {
                               sessionStorage.removeItem("item-button");
                               setShouldPlay(false);
                               setTryAgain(true);
-                              window.location.reload();
+                              window.location.replace(
+                                "http://localhost:3000/NEAR-SPS/#/app"
+                              );
                             }}
                           >
                             Try again
@@ -347,7 +378,9 @@ export const GameBoard = () => {
                         sessionStorage.removeItem("item-button");
                         setShouldPlay(false);
                         setTryAgain(true);
-                        window.location.reload();
+                        window.location.replace(
+                          "http://localhost:3000/NEAR-SPS/#/app"
+                        );
                       }}
                     >
                       Try again

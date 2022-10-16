@@ -32,7 +32,7 @@ export const createTransaction = async (
 
   const publicKey = PublicKey.from(accessKey.public_key);
   const nonce = accessKey.access_key.nonce + nonceOffset;
-
+  
   return nearApi.transactions.createTransaction(
     account.accountId,
     publicKey,

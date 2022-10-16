@@ -22,11 +22,16 @@ export const Balance = () => {
 
   const getUsnBalance = async () => {
     const usnContract = context.usnContract.contract;
+    const config = context.usnContract.config;
 
     const balance = await usnContract.ft_balance_of({
       account_id: context.currentUser.accountId,
     });
-    const parsedBalance = await context.fromPrecision("usn", balance);
+
+    const parsedBalance = await context.fromPrecision(
+      config.contractName,
+      balance
+    );
     localStorage.setItem("usn-balance", parsedBalance);
     setUsnBalance(parsedBalance);
   };

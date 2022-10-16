@@ -49,7 +49,7 @@ const initUsnContract = async () => {
     wallet.account(),
     config.contractName,
     {
-      viewMethods: ["ft_balance_of", "storage_balance_bounds"],
+      viewMethods: ["ft_balance_of", "storage_balance_bounds", "ft_metadata"],
       changeMethods: ["ft_transfer_call"],
       sender: wallet.account(),
     }

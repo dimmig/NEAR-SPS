@@ -1,11 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { ContextManager } from "../..";
 import usnIcon from "../assets/images/usn_image.png";
-import { 
-  DEPOSIT_GAS,
-  FT_TGAS,
-  ONE_YOCTO,
-} from "../constants/near-utils";
+import { DEPOSIT_GAS, FT_TGAS, ONE_YOCTO } from "../constants/near-utils";
 import "../assets/styles/MainApp/bet.css";
 import { actionsToTransaction } from "./transactions";
 
@@ -18,6 +14,8 @@ export const Bet = () => {
 
   const item = JSON.parse(sessionStorage.getItem("item-button"));
 
+  useEffect(() => {});
+
   useEffect(() => {
     getUsnContractBalance();
   });
@@ -28,13 +26,19 @@ export const Bet = () => {
 
   const getUsnContractBalance = async () => {
     const contract = context.usnContract.contract;
-    const config = context.contractConfig;
+    const contractConfig = context.contractConfig;
+    const usnConfig = context.usnContract.config;
 
     const balance = await contract.ft_balance_of({
-      account_id: config.contractName,
+      account_id: contractConfig.contractName,
     });
 
-    setContractBalance((balance / 100000000 / 2).toFixed(2));
+    const parsedBalance = await context.fromPrecision(
+      usnConfig.contractName,
+      balance
+    );
+
+    setContractBalance((parsedBalance / 2).toFixed(2));
   };
 
   const isNeedToDeposit = async () => {
@@ -48,11 +52,20 @@ export const Bet = () => {
     return !isRegistered;
   };
 
+  //Click enter to play
+  const input = document.getElementById("bet-input");
+  if (input !== null) {
+    input.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        document.getElementById("play-button").click();
+      }
+    });
+  }
+
   const onClick = async () => {
     const usnBalance = parseFloat(
       JSON.parse(localStorage.getItem("usn-balance"))
     );
-    const usnContract = context.usnContract.contract;
     const usnConfig = context.usnContract.config;
 
     const contract = context.contract;
@@ -91,8 +104,6 @@ export const Bet = () => {
       item_number: item,
       date: Date.now().toString(),
     };
-
-    localStorage.setItem("shouldPlay", true);
 
     const isUserRegistered = await isNeedToDeposit();
 
@@ -140,14 +151,26 @@ export const Bet = () => {
       return;
     }
 
-    await usnContract.ft_transfer_call(
-      {
+    const transferAction = {
+      args: {
         receiver_id: context.contractConfig.contractName,
         amount: parsedBet,
         msg: JSON.stringify(args),
       },
-      FT_TGAS,
-      ONE_YOCTO
+      gas: FT_TGAS,
+      deposit: ONE_YOCTO,
+      methodName: "ft_transfer_call",
+    };
+
+    const transferTransaction = await actionsToTransaction(
+      usnConfig.contractName,
+      context.wallet,
+      [transferAction]
+    );
+
+    await context.wallet.requestSignTransactions(
+      [transferTransaction],
+      `https://dimmig.github.io/NEAR-SPS/#/app?status=${args.date}`
     );
   };
 
@@ -176,7 +199,9 @@ export const Bet = () => {
               JSON.parse(localStorage.getItem("isModalShown")) ? (
                 <button disabled>Play</button>
               ) : (
-                <button onClick={onClick}>Play</button>
+                <button id="play-button" onClick={onClick}>
+                  Play
+                </button>
               )}
             </div>
           )}

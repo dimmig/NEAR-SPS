@@ -12,7 +12,6 @@ export const Header = () => {
 
   const signOut = () => {
     context.wallet.signOut();
-    localStorage.setItem("shouldPlay", false);
     window.location.reload();
   };
 
