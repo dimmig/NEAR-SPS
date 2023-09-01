@@ -1,0 +1,161 @@
+@import url("https://fonts.googleapis.com/css?family=Jost");
+
+.how-it-works {
+  font-family: "Jost";
+  padding: 0 5%;
+}
+
+.how-it-works h2 {
+  font-size: 40px;
+  font-weight: 400;
+  padding: 20px 20px 10px 20px;
+}
+
+.card-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-card-column {
+  display: none;
+}
+
+.work-card-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  min-width: 1230px;
+}
+
+.work-card-mobile-v {
+  display: none;
+}
+
+.work-card {
+  width: 293px;
+  height: 152px;
+  background: #eeeeee;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 17px;
+  padding: 10px 20px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  }
+
+.work-card-screenshot {
+  position: absolute;
+  width: 100%;
+  height: 50%;
+  display: flex;
+  justify-content: center;
+}
+
+.work-card-description {
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  top: 60%;
+  gap: 10px;
+}
+
+.work-card-description h4 {
+  font-weight: 400;
+  font-size: 24px;
+  opacity: 50%;
+  margin: 0;
+}
+
+.mobile-down-arrow {
+  display: none;
+}
+
+.arrow {
+  display: flex;
+  align-items: center;
+}
+
+.arrow-down-icon {
+  width: 100%;
+  height: 50%;
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  gap: 5%;
+}
+
+.fixed-arrow {
+  min-width: 1100px;
+}
+
+.darken {
+  mix-blend-mode: multiply;
+}
+
+.grouped-h4 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.row-grouped-h4 {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+.row-grouped-h4 a {
+  color: #000;
+  opacity: 50%;
+}
+
+.semi-bold {
+  font-weight: 500;
+  font-style: oblique;
+  text-decoration: underline;
+}
+
+.semi-bold:hover {
+  cursor: pointer;
+}
+
+@media screen and (max-width: 650px) {
+  .how-it-works {
+    padding: 0 10%;
+  }
+
+  .row-2 {
+    display: none;
+  }
+
+  .work-card-mobile-v {
+    width: 293px;
+    height: 152px;
+    background: #eeeeee;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 17px;
+    padding: 10px 20px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+  }
+
+  .arrow-down-icon {
+    display: none;
+  }
+  .arrow {
+    display: none;
+  }
+
+  .mobile-down-arrow {
+    display: flex;
+    justify-content: center;
+  }
+  .work-card-row {
+    min-width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+  }
+}

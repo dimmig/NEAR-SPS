@@ -1,0 +1,89 @@
+@import url("https://fonts.googleapis.com/css?family=Jost");
+
+.game-history {
+  font-family: "Jost";
+  height: 360px;
+  padding: 0 5% 20px 5%;
+  max-width: 1500px;
+  min-width: 1395px;
+  display: flex;
+  position: relative;
+  justify-content: center;
+  z-index: 1;
+}
+
+.game-history-card {
+  width: 100%;
+  background: #eeeeee;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 39px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.history-title {
+  width: 90%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50%;
+}
+
+.history-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+
+.no-border {
+  border-bottom: none;
+}
+
+.history-title h4 {
+  text-align: center;
+  font-size: 48px;
+  font-weight: 400;
+  margin: 0;
+}
+
+.blured-bg {
+  width: 100%;
+}
+
+.history-wallet-button {
+  position: absolute;
+  display: flex;
+  bottom: 40%;
+  left: 40%;
+  z-index: 2;
+}
+
+.history-wallet-button button {
+  background-color: rgba(0, 128, 105, 0.9);
+}
+
+.history-wallet-button button:hover {
+  background-color: rgba(0, 128, 105, 0.8);
+}
+
+@media screen and (max-width: 650px) {
+  .game-history {
+    display: flex;
+    flex-direction: column;
+    min-width: 90%;
+    height: 100%;
+    margin-top: 10%;
+  }
+
+  .history-wallet-button {
+    left: 25%;
+  }
+
+  .play-button {
+    margin-left: 15px;
+  }
+}
