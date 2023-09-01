@@ -10,7 +10,7 @@
   height: 24px;
 }
 
-@media screen and (max-width: 500px) {
+@media screen and (max-width: 650px) {
   .footer img {
     width: 30px;
     height: 30px;

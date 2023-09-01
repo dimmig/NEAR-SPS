@@ -20,6 +20,7 @@ body {
   padding: 5% 5%;
   min-width: 1200px;
   max-width: 90%;
+  flex-wrap: wrap;
 }
 
 .not-visible {
@@ -40,7 +41,7 @@ body {
   user-select: none;
 }
 
-@media screen and (max-width: 500px) {
+@media screen and (max-width: 650px) {
   .balance-bet-row {
     padding: 15% 5% 10% 5%;
     display: flex;

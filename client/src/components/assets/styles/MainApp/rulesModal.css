@@ -71,7 +71,7 @@
   padding: 0 5%;
 }
 
-@media screen and (max-width: 500px) {
+@media screen and (max-width: px) {
   .rules-modal {
     width: 90%;
     height: 350px;

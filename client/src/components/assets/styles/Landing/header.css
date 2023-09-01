@@ -65,7 +65,7 @@
   background-color: rgba(0, 128, 105, 0.1);
 }
 
-@media screen and (max-width: 500px) {
+@media screen and (max-width: 650px) {
   .play-button button {
     font-size: 20px;
     width: 200px;

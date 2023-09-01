@@ -53,7 +53,7 @@ export const HowItWorks = () => {
               <img src={algorithmIcon} alt="algorithIcon" />
             </div>
             <div className="work-card-description">
-              <h4>You play with program that randomaticly choose item</h4>
+              <h4>You play with program that randomly choose item</h4>
             </div>
           </div>
         </div>

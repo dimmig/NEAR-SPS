@@ -42,7 +42,7 @@
   position: relative;
   display: flex;
   justify-content: center;
-}
+  }
 
 .work-card-screenshot {
   position: absolute;
@@ -119,7 +119,7 @@
   cursor: pointer;
 }
 
-@media screen and (max-width: 500px) {
+@media screen and (max-width: 650px) {
   .how-it-works {
     padding: 0 10%;
   }

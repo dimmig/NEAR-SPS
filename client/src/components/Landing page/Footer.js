@@ -7,13 +7,13 @@ import "../assets/styles/Landing/footer.css";
 export const Footer = () => {
   return (
     <div className="footer">
-      <a href="/#/telegram">
+      <a href="/#">
         <img src={telegramIcon} alt="telegram-icon" />
       </a>
-      <a href="/#/twitter">
+      <a href="/#">
         <img src={twitterIcon} alt="twitter-icon" />
       </a>
-      <a href="/#/github">
+      <a href="/#">
         <img src={githubIcon} alt="github-icon" />
       </a>
     </div>

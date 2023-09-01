@@ -14,8 +14,9 @@
 .card-row {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  min-width: 1000px;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap:5rem
 }
 
 .card {
@@ -26,6 +27,7 @@
   border-radius: 17px;
   padding: 10px 20px;
   position: relative;
+  flex-basis: 239px;
 }
 
 .card h3 {
@@ -88,7 +90,7 @@
   justify-content: center;
 }
 
-@media screen and (max-width: 500px) {
+@media screen and (max-width: 650px) {
   .how-use {
     padding: 0 10%;
   }
